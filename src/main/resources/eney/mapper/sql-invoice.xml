@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="invoice">
+	<update id="updateInvoiceGenerate" parameterType="eney.domain.UserInvoiceVO">
+		update n_user_invoice
+		set generate_yn = 'Y'
+		where invoice_idx = #{invoice_idx}
+	</update>
+	
+	<insert id="insertInvoice" parameterType="eney.domain.UserInvoiceVO">
+		insert into n_user_invoice (invoice_idx, userid, invoice_issue_date, invoice_number)
+		values (#{invoice_idx}, #{userid}, SYSDATE(), #{invoice_number})
+		<selectKey resultType="int" keyProperty="invoice_idx" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+	<insert id="insertInvoiceContent" parameterType="eney.domain.UserInvoiceVO">
+		insert into n_invoice_content( userid,service, service_type, service_period, end_date, pay_state, pay_way, invoice_idx,sum,corporate_address,publish_email,ceo_name,reg_date)
+		values ( #{userid},#{service},#{service_type}, #{service_period},#{end_date},#{pay_state},#{pay_way},#{invoice_idx},#{sum},#{corporate_address},#{publish_email},#{ceo_name},#{reg_date})
+		<selectKey resultType="int" keyProperty="invoice_idx" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+	<select id="selectInvoiceList" parameterType="eney.domain.UserInvoiceVO" resultType="eney.domain.UserInvoiceVO">
+		SELECT * 
+		FROM n_user_invoice 
+		WHERE userid = #{userid}
+		ORDER BY invoice_issue_date DESC 
+	</select>
+	
+</mapper>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="customer-case">
+
+    <select id = "subscribeCheck" resultType = "eney.domain.ServiceApplyVO" parameterType="eney.domain.ServiceApplyVO">
+		SELECT * FROM n_service_3rdpart
+		where userid = #{userid}
+		and service_type = 'consulting'
+		and pay_state = 'approve'
+		and status = 'using'
+	</select>
+
+	<select id="getCustomerCaseCount" resultType="java.lang.Integer" parameterType="eney.domain.CustomerCaseVO">
+		select
+		count(*)
+		from
+		customer_case
+		<if test="type_code != '' and type_code != null">
+			where type_code = #{type_code}
+		</if>
+	</select>
+
+	<select id="getCustomerCase" resultType = "eney.domain.CustomerCaseVO">
+		SELECT * FROM customer_case
+		join customer_case_code
+		on customer_case.type_code = customer_case_code.code
+		where customer_case.idx = #{idx}
+	</select>
+
+	<select id="getCustomerCaseCate" resultType = "eney.domain.CustomerCaseVO" parameterType="java.lang.Integer">
+		SELECT * FROM customer_case_code
+	</select>
+
+
+	<select id="getCustomerCaseList" resultType = "eney.domain.CustomerCaseVO">
+		SELECT *
+		FROM
+		(
+		SELECT
+		@num:=@num+1 rownum,
+		E.*
+		FROM
+		(SELECT @num:=0) D,
+		(
+		SELECT * FROM customer_case
+		join customer_case_code
+		on customer_case.type_code = customer_case_code.code
+		<if test="type_code != '' and type_code != null">
+			where type_code = #{type_code}
+		</if>
+		ORDER by idx DESC
+		) E
+		)Z
+		<where>
+			<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+				Z.rownum between #{startRowNo} and #{endRowNo}
+			</if>
+		</where>
+
+	</select>
+
+	<insert id="insertCustomerCase" parameterType="eney.domain.CustomerCaseVO">
+		INSERT into  customer_case (content,link, clients, project, description, tumbnail_file, type_code, release_date)
+		VALUES (#{content},#{link}, #{clients}, #{project}, #{description}, #{tumbnail_file}, #{type_code}, #{release_date})
+	</insert>
+
+	<update id="editCustomerCase" parameterType="eney.domain.CustomerCaseVO">
+		UPDATE customer_case SET
+		content = #{content},
+		link = #{link},
+		clients = #{clients},
+		project = #{project},
+		description = #{description},
+		type_code = #{type_code},
+		release_date = #{release_date}
+		<if test="tumbnail_file != null">
+			, tumbnail_file = #{tumbnail_file}
+		</if>
+		WHERE idx = #{idx}
+	</update>
+
+	<delete id="deleteCustomerCase" parameterType="java.lang.Integer">
+		delete from customer_case
+		where idx = #{idx}
+	</delete>
+
+
+
+</mapper>

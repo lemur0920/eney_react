@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="dashboardGroup">
+
+	<select id = "gets" parameterType = "string" resultType = "hashmap">
+		SELECT * FROM dashboardGroups WHERE UserID=#{userid} and IsDeleted='N'
+	</select>
+
+	<select id = "get" parameterType = "hashmap" resultType = "hashmap">
+		SELECT * FROM dashboardGroups WHERE GroupID = #{groupid} and UserID = #{userid}  and IsDeleted='N'
+	</select>
+
+	<insert id = "post" parameterType = "hashmap">
+		INSERT INTO DashboardGroups
+			(GroupName,UserID,IsDeleted, CreatedDate,LastUpdatedDate)
+		VALUES (#{groupname},#{userid},'N',sysdate(),sysdate())
+		<selectKey resultType="Integer" keyProperty="idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<update id = "put" parameterType="hashmap">
+		UPDATE DashboardGroups
+		SET GroupName=#{groupname}, LastUpdatedDate = sysdate()
+		WHERE GroupID = #{id} and UserID = #{userid}
+	</update>
+
+	<update id = "delete" parameterType="hashmap">
+		UPDATE DashboardGroups
+		SET IsDeleted = 'Y'
+		WHERE GroupID=#{id} and UserID=#{userid}
+	</update>
+
+
+	
+</mapper>

@@ -1,0 +1,62 @@
+{"properties": [
+  {
+    "name": "datasource.web.driver-class-name",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.web.driver-class-name'"
+  },
+  {
+    "name": "datasource.web.url",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.web.url'"
+  },
+  {
+    "name": "datasource.web.username",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.web.username'"
+  },
+  {
+    "name": "datasource.web.password",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.web.password'"
+  },
+  {
+    "name": "datasource.ivr.driver-class-name",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.web.driver-class-name'"
+  },
+  {
+    "name": "datasource.ivr.url",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.web.url'"
+  },
+  {
+    "name": "datasource.ivr.username",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.web.username'"
+  },
+  {
+    "name": "datasource.ivr.password",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.web.password'"
+  },
+  {
+    "name": "eney.portal.api-token-len",
+    "type": "java.lang.String",
+    "description": "A description for 'eney.portal.api-token-len'"
+  },
+  {
+    "name": "datasource.ivr.validation-query",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.ivr.validation-query'"
+  },
+  {
+    "name": "datasource.web.test-on-borrow",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.web.test-on-borrow'"
+  },
+  {
+    "name": "datasource.web.validation-query",
+    "type": "java.lang.String",
+    "description": "A description for 'datasource.web.validation-query'"
+  }
+]}

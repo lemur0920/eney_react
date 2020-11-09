@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="analytics">
+
+	<resultMap type="eney.domain.ShortUrlBasicVO" id="shortUrlBasicRM">
+		<result column="n_original_url" property="original_url"/>
+		<result column="date" property="created_date"/>
+	</resultMap>
+	<resultMap type="eney.domain.ShortUrlJoinVO" id="shortUrlJoinRM">
+		<result column="url_idx" property="urlIdx"/>
+		<result column="n_short_url" property="shortUrl"/>
+		<result column="n_channel" property="channel"/>
+	</resultMap>
+
+	<resultMap type="eney.domain.GAViewIdVO" id="gaViewIdRM">
+		<result column="idx" property="idx"/>
+		<result column="view_id" property="viewId"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="user_id" property="userId"/>
+		<result column="domain_address" property="domainAddress"/>
+		<result column="comments" property="comments"/>
+	</resultMap>
+
+	<resultMap type="eney.domain.GAKeyWordVO" id="gaKeyWordRM">
+		<result column="idx" property="idx"/>
+		<result column="keyword" property="keyword"/>
+		<result column="keyword_cnt" property="keywordCnt"/>
+		<result column="vno" property="vno"/>
+		<result column="user_id" property="userId"/>
+		<result column="search_date" property="searchDate"/>
+		<result column="success_time_stamp" property="successTimeStamp"/>
+	</resultMap>
+
+	<!-- 콜로그 차트에 필요 한 정보 출력 쿼리 -->
+	<select id="getAllCallAnalyticsById" resultType="java.util.HashMap">
+		SELECT total,connected,agent_not_found,connect_failed,STR_TO_DATE(date, '%Y%m%d') as date
+		FROM cdr where user_id=#{VALUE}
+		and date >  NOW() - INTERVAL 10 DAY;
+	</select>
+
+	<select id="getCampaignCountSummaryById" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select
+		n_short_url as shortUrl,
+		jo.n_channel as channel
+		from
+		n_shorturl_basic basic,
+		n_shorturl_join jo
+		where
+		basic.url_idx=jo.url_idx and
+		basic.user_id=#{id}
+		<if test="idx != null">
+		AND basic.url_idx = #{idx}
+		</if>
+		order by basic.created_date asc;
+	</select>
+
+	<select id="getShortUrlCount" resultType="java.util.HashMap">
+		SELECT
+		COUNT(*) as count,DATE_FORMAT(created_time,'%Y%m%d')  as date
+		FROM
+		n_shorturl_info
+		where
+		n_short_url=#{VALUE} AND
+		created_time >  NOW() - INTERVAL 7 DAY
+		group by date
+		order by created_time asc;
+	</select>
+
+
+	<select id="getTitleListByUserId" resultType="java.util.HashMap">
+		SELECT
+		url_idx,title,DATE_FORMAT(created_date,'%Y%m%d')  as date,n_original_url as orgurl
+		FROM
+		eney.n_shorturl_basic
+		where
+		user_id=#{VALUE}
+		and
+		enable = '0'
+		order by url_idx asc;
+	</select>
+
+	<select id="getTotalCampaignCountById" resultType="java.lang.Integer">
+	SELECT
+    count(*)
+	FROM
+    n_shorturl_basic
+	WHERE
+    user_id = #{VALUE }
+
+	</select>
+
+	<select id = "getCampaignListByUserId" resultMap ="shortUrlBasicRM" parameterType="java.util.HashMap" >
+		SELECT
+		c.url_idx,c.title,c.n_original_url,DATE_FORMAT(c.created_date,'%Y%m%d')  as date
+        from
+        (select @ROWNUM := @ROWNUM + 1 AS rnum, a .* from
+        (SELECT *
+        	FROM n_shorturl_basic
+        	order by created_date desc) a,
+        	(SELECT @ROWNUM := 0) b) c
+        WHERE c.user_id=#{id}
+        	AND c.rnum BETWEEN #{startNum} AND #{endNum}
+
+	</select>
+
+	<select id="getShortUrlListByIdx"	resultMap="shortUrlJoinRM" >
+		SELECT n_short_url,n_channel
+		FROM n_shorturl_join
+		where url_idx=#{VALUE };
+	</select>
+
+	<select id="getGAViewIdListByUserId" resultMap="gaViewIdRM" parameterType="java.lang.String">
+		SELECT *
+		FROM ga_view_id
+		WHERE user_id = #{userId}
+	</select>
+
+	<select id="getGAViewIdList" resultMap="gaViewIdRM">
+		SELECT *
+		FROM ga_view_id
+	</select>
+
+	<insert id="insertGAKeywordData" parameterType="java.util.List">
+		INSERT INTO ga_call_keyword (keyword, keyword_cnt, source,device_category,city,  os, browser, vno, user_id, used_view_id, search_date, success_time_stamp)
+		VALUES
+		<foreach collection="list" item="item" separator=" , " >
+			(#{item.keyword},#{item.keywordCnt},#{item.source},#{item.device_category},#{item.city},#{item.os},#{item.browser},#{item.vno},#{item.userId}, #{item.usedViewId},#{item.searchDate},sysdate())
+		</foreach>
+	</insert>
+
+	<insert id="insertGAKeywordDataLog" parameterType="eney.domain.GAViewIdVO">
+		INSERT INTO ga_keyword_insert_log (log, log_reg_date, view_id)
+		VALUES (#{log},sysdate(),#{viewId})
+	</insert>
+
+
+
+	<select id="getAnalyticsViewIdCount" resultType="java.lang.Integer">
+		select
+		count(*)
+		from
+		ga_view_id
+	</select>
+
+	<select id="getAnalyticsViewIdByViewId" resultType="java.lang.Integer" parameterType="eney.domain.GAViewIdVO">
+		select
+		count(*)
+		from
+		ga_view_id
+		where view_id = #{viewId}
+		and user_id = #{userId}
+	</select>
+
+	<select id="getAnalyticsViewIdList" parameterType="eney.domain.GAViewIdVO" resultType = "eney.domain.GAViewIdVO">
+		SELECT *
+		FROM
+		(
+		SELECT
+		@num:=@num+1 rownum,
+		E.*
+		FROM
+		(SELECT @num:=0) D,
+		(SELECT idx, view_id as viewId, user_id as userId, reg_date as regDate, comments
+		FROM ga_view_id
+		WHERE user_id=#{userId}
+		ORDER by idx DESC
+		) E
+		)Z
+		<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+			where Z.rownum between #{startRowNo} and #{endRowNo}
+		</if>
+
+	</select>
+
+	<insert id="insertAnalyticsViewId" parameterType="eney.domain.GAViewIdVO">
+		INSERT INTO ga_view_id (view_id, user_id, reg_date, comments)
+		VALUES (#{viewId},#{userId},sysdate(),#{comments})
+	</insert>
+
+	<update id="editAnalyticsViewId" parameterType="eney.domain.GAViewIdVO">
+		UPDATE ga_view_id SET
+			view_id = #{viewId},
+			comments = #{comments}
+		WHERE user_id = #{userId}
+		and idx=#{idx}
+	</update>
+
+
+	<delete id="deleteAnalyticsViewId" parameterType="eney.domain.GAViewIdVO">
+		delete from ga_view_id
+		where idx = #{idx}
+		and user_id = #{userId}
+	</delete>
+	
+</mapper>

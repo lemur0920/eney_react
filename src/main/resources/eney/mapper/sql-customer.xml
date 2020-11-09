@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="customer">
+
+	<select id="getCustomerCount" resultType="java.lang.Integer" parameterType="eney.domain.CustomerVO">
+		select
+		count(*)
+		from
+		customer
+		<where>
+			user_id = #{user_id}
+			<if test="searchFiled != null and searchFiled != '' and searchValue != null and searchValue != ''">
+				AND ${searchFiled} like '%' #{searchValue} '%'
+			</if>
+			<if test="startDate != null">
+				AND <![CDATA[date(reg_date) >= #{startDate}]]>
+			</if>
+			<if test="endDate != null">
+				AND <![CDATA[date(reg_date) <= #{endDate}]]>
+			</if>
+		</where>
+	</select>
+
+	<select id="getCustomer" resultType = "eney.domain.CustomerVO" parameterType="eney.domain.CustomerVO">
+		SELECT * FROM customer
+		where idx = #{idx}
+		and user_id = #{user_id}
+	</select>
+
+	<select id="getCustomerInfo" resultType = "eney.domain.CustomerVO" parameterType="eney.domain.CustomerVO">
+		SELECT * FROM customer
+		where idx = #{idx}
+		and user_id = #{user_id}
+	</select>
+
+
+	<select id="getCustomerList" resultType = "eney.domain.CustomerVO">
+		SELECT *
+		FROM
+		(
+		select
+		@num:=@num+1 rownum,
+		E.*
+		from
+		(SELECT @num:=0) D,
+		(
+			SELECT
+			*
+			FROM customer
+			<where>
+				user_id = #{user_id}
+				<if test="searchFiled != null and searchFiled != '' and searchValue != null and searchValue != ''">
+					AND ${searchFiled} like '%' #{searchValue} '%'
+				</if>
+				<if test="startDate != null">
+					AND <![CDATA[date(reg_date) >= #{startDate}]]>
+				</if>
+				<if test="endDate != null">
+					AND <![CDATA[date(reg_date) <= #{endDate}]]>
+				</if>
+			</where>
+		)  E
+		ORDER BY idx DESC
+		)  Z
+		<where>
+			<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+				Z.rownum between #{startRowNo} and #{endRowNo}
+			</if>
+		</where>
+
+	</select>
+
+	<select id="getGroupUnusedCustomerList" resultType = "eney.domain.CustomerVO">
+        SELECT
+        *
+        FROM customer
+        where user_id = #{user_id}
+        and group_idx is null
+
+	</select>
+
+	<select id="getGroupByCustomerList" resultType = "eney.domain.CustomerVO">
+        SELECT
+        *
+        FROM customer
+        where user_id = #{user_id}
+        and group_idx = ${group_idx}
+
+	</select>
+
+	<select id="getGroupByCustomerListCount" resultType="int">
+        SELECT
+        count(*)
+        FROM customer
+        where user_id = #{user_id}
+        and group_idx = ${group_idx}
+
+	</select>
+
+    <insert id="insertCustomerCase" parameterType="eney.domain.CustomerCaseVO">
+		INSERT into  customer_case (content,link, clients, project, description, tumbnail_file, type_code, release_date)
+		VALUES (#{content},#{link}, #{clients}, #{project}, #{description}, #{tumbnail_file}, #{type_code}, #{release_date})
+	</insert>
+
+	<update id="editCustomerCase" parameterType="eney.domain.CustomerCaseVO">
+		UPDATE customer_case SET
+		content = #{content},
+		link = #{link},
+		clients = #{clients},
+		project = #{project},
+		description = #{description},
+		type_code = #{type_code},
+		release_date = #{release_date}
+		<if test="tumbnail_file != null">
+			, tumbnail_file = #{tumbnail_file}
+		</if>
+		WHERE idx = #{idx}
+	</update>
+
+	<delete id="deleteCustomerCase" parameterType="java.lang.Integer">
+		delete from customer_case
+		where idx = #{idx}
+	</delete>
+
+
+	<select id="getCustomerEventCount" resultType="java.lang.Integer" parameterType="eney.domain.CustomerVO">
+		select
+		count(*)
+		from
+		customer_event
+		<where>
+			customer_idx = #{customer_idx}
+		</where>
+	</select>
+
+
+	<select id="customerdupleCheck" resultType="java.lang.Integer" parameterType="eney.domain.CustomerVO">
+		select
+		count(*)
+		from
+		customer
+		where user_id = #{user_id}
+		and phone_number = #{phone_number}
+	</select>
+
+
+	<insert id="addCustomer" parameterType="eney.domain.CustomerVO">
+		insert into customer (user_id,name, phone_number,gender,team_name, address,email, reg_date)
+		values(#{user_id}, #{name}, #{phone_number},#{gender}, #{team_name}, #{address}, #{email}, now())
+	</insert>
+
+	<update id="updateCustomerInfo" parameterType="eney.domain.CustomerVO">
+		UPDATE customer
+		<set>
+			<if test="name != null">
+				name = #{name},
+			</if>
+			<if test="team_name != null">
+				team_name = #{team_name},
+			</if>
+			<if test="gender != null">
+				gender = #{gender},
+			</if>
+			<if test="email != null">
+				email = #{email},
+			</if>
+		</set>
+		where idx = #{idx}
+		and user_id = #{user_id}
+	</update>
+
+	<select id="getCustomerEventList" resultType = "eney.domain.CustomerEventVO">
+		SELECT *
+		FROM
+		(
+		select
+		@num:=@num+1 rownum,
+		E.*
+		from
+		(SELECT @num:=0) D,
+		(
+		SELECT
+		*
+		FROM customer_event
+		<where>
+			customer_idx = #{customer_idx}
+		</where>
+		)  E
+		ORDER BY idx DESC
+		)  Z
+		<where>
+			<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+				Z.rownum between #{startRowNo} and #{endRowNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="getCustomerGroupCount" resultType="java.lang.Integer" parameterType="eney.domain.CustomerGroupVO">
+		select
+		count(*)
+		from
+		customer_group
+		where user_id = #{user_id}
+	</select>
+
+	<select id="getGroup" resultType = "eney.domain.CustomerGroupVO" parameterType="eney.domain.CustomerGroupVO">
+		SELECT * FROM customer_group
+		where idx = #{idx}
+		and user_id = #{user_id}
+	</select>
+
+    <select id="getCustomerGroupList" resultType="eney.domain.CustomerGroupVO"
+            parameterType="eney.domain.CustomerGroupVO">
+        SELECT *
+        FROM
+        (
+        select
+        @num:=@num+1 rownum,
+        E.*
+        from
+        (SELECT @num:=0) D,
+        (
+        SELECT
+        *
+        FROM customer_group
+        where user_id = #{user_id}
+        ) E
+        ORDER BY idx DESC
+        ) Z
+        <where>
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                Z.rownum between #{startRowNo} and #{endRowNo}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="getAllCustomerGroupList" resultType="eney.domain.CustomerGroupVO"
+            parameterType="eney.domain.CustomerGroupVO">
+        SELECT *
+        FROM
+        (
+        select
+        @num:=@num+1 rownum,
+        E.*
+        from
+        (SELECT @num:=0) D,
+        (
+        SELECT
+        *
+        FROM customer_group
+        where user_id = #{user_id}
+        ) E
+        ORDER BY idx DESC
+        ) Z
+        <where>
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                Z.rownum between #{startRowNo} and #{endRowNo}
+            </if>
+        </where>
+
+	</select>
+
+	<select id="nameDupleCheckCustomerGroup" resultType="java.lang.Integer" parameterType="eney.domain.CustomerGroupVO">
+		select
+		count(*)
+		from
+		customer_group
+		where user_id = #{user_id}
+		and group_name = #{group_name}
+	</select>
+
+
+	<insert id="addCustomerGroup" parameterType="eney.domain.CustomerCaseVO">
+		INSERT into  customer_group (group_name,reg_date, last_update, user_id)
+		VALUES (#{group_name},now(), now(), #{user_id})
+	</insert>
+
+	<delete id="deleteCustomerGroup" parameterType="eney.domain.CustomerGroupVO">
+		delete from customer_group
+		where idx = #{idx}
+		and user_id = #{user_id}
+	</delete>
+
+
+	<update id="updateCustomerGroup" parameterType="eney.domain.CustomerGroupVO">
+		UPDATE customer_group SET
+		group_name = #{group_name},
+		last_update = sysdate()
+		where idx = #{idx}
+		and user_id = #{user_id}
+	</update>
+
+	<update id="updateCustomerGroupMember" parameterType="eney.domain.CustomerGroupVO">
+		UPDATE customer SET
+		group_idx = #{idx}
+		where user_id = #{user_id}
+		<if test="use_customer_idx_list != null">
+			and idx IN
+			<foreach collection="use_customer_idx_list" item="item" index="index" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+	</update>
+
+	<update id="updateCustomerGroupMemberRemove" parameterType="eney.domain.CustomerGroupVO">
+		UPDATE customer SET
+		group_idx =  null
+		where user_id = #{user_id}
+		<if test="unused_customer_idx_list != null">
+			and idx IN
+			<foreach collection="unused_customer_idx_list" item="item" index="index" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+	</update>
+
+	<insert id="bulkUploadCustomer" parameterType="eney.domain.CustomerVO">
+		insert into customer (user_id,name, phone_number,gender,team_name,email, reg_date)
+		values(#{user_id}, #{name}, #{phone_number},#{gender}, #{team_name}, #{email}, now())
+	</insert>
+
+
+
+</mapper>

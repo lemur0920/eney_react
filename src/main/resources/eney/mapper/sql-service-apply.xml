@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="service-apply">
+    <select id="getCloudServiceApplyCnt" resultType="java.lang.Integer" parameterType="eney.domain.ServiceApplyVO">
+        select
+        count(*)
+        from
+        n_service_cloud
+    </select>
+
+    <select id="getCloudServiceApply" resultType = "eney.domain.ServiceApplyVO" parameterType="java.lang.Integer">
+        select
+         *
+        from
+        n_service_cloud
+        where idx = #{idx}
+
+    </select>
+    <select id="getCloudServiceApplyList" resultType = "eney.domain.ServiceApplyVO">
+        SELECT *
+        FROM
+        (
+        SELECT
+        @num:=@num+1 rownum,
+        E.*
+        FROM
+        (SELECT @num:=0) D,
+        (
+        SELECT * FROM n_service_cloud
+        ORDER by idx DESC
+        ) E
+        )Z
+        <where>
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                Z.rownum between #{startRowNo} and #{endRowNo}
+            </if>
+        </where>
+
+    </select>
+
+    <update id="editCloudServiceApplyStatus" parameterType="eney.domain.ServiceApplyVO">
+        UPDATE n_service_cloud SET
+        pay_state = #{pay_state},
+        status = #{status}
+        WHERE idx = #{idx}
+    </update>
+
+<!--    <delete id="deleteCustomerCase" parameterType="java.lang.Integer">-->
+<!--		delete from customer_case-->
+<!--		where idx = #{idx}-->
+<!--	</delete>-->
+
+
+</mapper>

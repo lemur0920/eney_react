@@ -1,0 +1,1161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="user">
+	<resultMap id="invoiceMap" type="eney.domain.UserInvoiceVO">
+		<id property="idx" column="idx"/>
+		<result property="userid" column="userid"/>
+		<result property="invoice_service_name" column="invoice_service_name"/>
+		<result property="invoice_issue_date" column="invoice_issue_date"/>
+		<result property="invoice_number" column="invoice_number"/>
+		<result property="file_id" column="file_id"/>
+		<collection property="fileVO_list" ofType="eney.domain.FileVO">
+	    <id property="file_id" column="file_id"/>
+	     <result property="refer_id" column="refer_id"/>
+	     <result property="category" column="category"/>
+	     <result property="name" column="name"/>
+	     <result property="upload_name" column="upload_name"/>
+	     <result property="extenstion" column="extenstion"/>
+	     <result property="volume" column="volume"/>
+	  </collection>
+	</resultMap>
+
+	<select id="getUserInfo" parameterType="eney.domain.UserVO" resultType="eney.domain.UserVO">
+	 	select * from (select * from n_user where userid = #{userid}) A
+		left join n_user_info B on A.userid = B.userid
+		<!-- left join n_epoint_log D on A.userid = D.userid
+		order by D.charge_date desc limit 1; -->
+	</select>
+	<update id = "updateLastLogin" parameterType = "eney.domain.UserVO">
+		update n_user
+		set last_login = sysdate()
+		where userid = #{userid}
+	</update>
+	<select id ="selectFindUserId" parameterType="eney.domain.UserVO" resultType="eney.domain.UserVO">
+		select * from n_user where phone_number = #{phone_number}
+	</select>
+	<select id ="getIdenCode" parameterType="eney.domain.UserVO" resultType="eney.domain.UserVO">
+		select * from n_user_identification_code where userid = #{userid} and iden_code_date = CURDATE()
+	</select>
+	<select id="getPatchcallServiceListForInvoice" parameterType="eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+	 	<![CDATA[
+	 	select * from n_service_patchcall
+	 	where userid = #{userid} and
+	 	pay_way IN( '자동이체','계좌이체') and pay_state = 'approve'
+		]]>
+	</select>
+	<select id="getHostingServiceListForInvoice" parameterType="eney.domain.ServiceWebHostingVO" resultType="eney.domain.ServiceWebHostingVO">
+	 	<![CDATA[
+	 	select * from n_service_web
+	 	where userid = #{userid} and
+	 	pay_way IN( '자동이체','계좌이체') and pay_state = 'approve'
+		]]>
+	</select>
+	<select id = "getPatchcallOtherserviceListForInvoice" parameterType="eney.domain.ServicePatchcallOtherVO" resultType="eney.domain.ServicePatchcallOtherVO">
+		<![CDATA[
+		select * from n_service_patchcall_other
+		where userid = #{userid} and
+		pay_way IN( '자동이체','계좌이체') and pay_state = 'approve'
+		]]>
+	</select>
+	<select id="checkCallbackSmsServiceForInvoice" parameterType = "eney.domain.CallbackSmsVO" resultType="eney.domain.CallbackSmsVO">
+		<![CDATA[
+		select * from n_service_callback_sms
+		where userid = #{userid} and
+		pay_way IN( '자동이체','계좌이체') and pay_state = 'approve'
+		]]>
+	</select>
+	<select id="selectRecordServiceListForInvoice" parameterType = "eney.domain.RecordVO" resultType="eney.domain.RecordVO">
+		<![CDATA[
+		select * from n_service_record
+		where userid = #{userid} and
+		pay_way IN( '자동이체','계좌이체') and pay_state = 'approve'
+		]]>
+	</select>
+	<select id="getPatchcallServiceList" parameterType="eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+	 	select * from n_service_patchcall where userid = #{userid}
+	</select>
+	<select id="getPatchcallServiceListCheckOn" parameterType="eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+	 	select * from n_service_patchcall where userid = #{userid} and generate_yn = 'Y'
+	</select>
+	<select id="getHostingServiceList" parameterType="eney.domain.ServiceWebHostingVO" resultType="eney.domain.ServiceWebHostingVO">
+	 	select * from n_service_web where userid = #{userid}
+	</select>
+
+	<select id="getHostingServiceListByVO" parameterType="eney.domain.ServiceWebHostingVO" resultType="eney.domain.ServiceWebHostingVO">
+		select * from n_service_web where userid = #{userid}
+		<if test="present_page != null and present_page != '' ">
+			LIMIT #{present_first_item_idx}, #{page_per_item_num}
+		</if>
+	</select>
+
+	<select id = "getPatchcallOtherserviceList" parameterType="eney.domain.ServicePatchcallOtherVO" resultType="eney.domain.ServicePatchcallOtherVO">
+		select * from n_service_patchcall_other where userid = #{userid}
+	</select>
+	<select id="getHostingServerList" parameterType="eney.domain.ServiceServerHostingVO" resultType="eney.domain.ServiceServerHostingVO">
+	 	select * from n_service_server where userid = #{userid}
+	</select>
+	<select id="getVpnList" parameterType="eney.domain.ServiceVpnHostingVO" resultType="eney.domain.ServiceVpnHostingVO">
+	 	select * from n_service_vpn where userid = #{userid}
+	</select>
+	<select id="getVpnListByVO" parameterType="eney.domain.ServiceVpnHostingVO" resultType="eney.domain.ServiceVpnHostingVO">
+		select * from n_service_vpn where userid = #{userid}
+		<if test="present_page != null and present_page != '' ">
+			LIMIT #{present_first_item_idx}, #{page_per_item_num}
+		</if>
+	</select>
+	<select id="getHometaxList" parameterType="eney.domain.UserHometaxVO" resultType="eney.domain.UserHometaxVO">
+	 	select * from n_user_hometax where userid = #{userid} order by hometax_issue_date desc
+	</select>
+	<select id='getBillingList' parameterType="eney.domain.UserHometaxVO" resultType="eney.domain.UserHometaxVO">
+		select distinct A.userid ,A.hometax_issue_date,A.tax_number,A.hometax_amount,A.hometax_vat,B.invoice_idx,B.pay_history,B.generate_yn
+         	from n_user_hometax A
+         left outer join n_user_invoice B on A.invoice_idx = B.invoice_idx
+        where A.userid = #{userid}
+         group by A.tax_number order by A.hometax_issue_date
+  	</select>
+	<select id="getInvoiceList" parameterType="eney.domain.UserInvoiceVO" resultType="eney.domain.UserInvoiceVO">
+		select * from n_user_invoice where userid = #{userid}
+		order by invoice_issue_date desc
+	</select>
+	<select id="getServiceListCheckPublishEmail" parameterType="eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+		SELECT * FROM getapplyservicelist WHERE userid = #{userid} and corporate_address != '' limit 1
+	</select>
+	<select id="getServiceList" parameterType="eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+		SELECT * FROM getapplyservicelist WHERE userid = #{userid}
+	</select>
+
+	<select id="getDropUserInfo" parameterType="eney.domain.UserVO" resultType="eney.domain.UserVO">
+	 	select * from n_user_drop where userid = #{userid}
+	</select>
+
+	<update id="updateUserData" parameterType="eney.domain.UserVO">
+		update n_user
+		<set>
+			<if test="column == 'password'">
+				password = #{updatedVal},
+				password_last_update = #{password_last_update}
+			</if>
+			<if test="column == 'email'">
+				email = #{updatedVal},
+			</if>
+			<if test="column == 'sms'">
+				sms = #{sms},
+			</if>
+			<if test="column == 'email_agree'">
+				email_agree = #{email_agree},
+			</if>
+		</set>
+		<where>
+			userid = #{userid}
+		</where>
+	</update>
+
+	<update id="updateUserMarketingData" parameterType="eney.domain.UserVO">
+		UPDATE n_user
+	    SET
+			sms = #{sms},
+			email_agree = #{email_agree}
+		WHERE
+			userid = #{userid}
+	</update>
+
+	<select id="getCompanyKindList" resultType="eney.domain.CompanyKindVO">
+	 	select * from company_kind
+	</select>
+
+	<select id="getUserInfoByData" parameterType="eney.domain.UserVO" resultType="eney.domain.UserVO">
+		select * from n_user where ${column} = #{column_data}
+	</select>
+	<update id = "sendIdentification" parameterType = "eney.domain.UserVO" >
+		update n_user_identification_code
+		set	 iden_code_date = curdate(),
+			 identification_code = #{identification_code}
+		where userid = #{userid}
+	</update>
+	<insert id="insertWithDrawUser" parameterType="eney.domain.UserVO">
+		insert into n_user_drop
+		(
+			idx,
+			name,
+			userid,
+			birth_day,
+			password,
+			email,
+			phone_number,
+			sms,
+			email_agree,
+			account_bank,
+			account_number,
+			sex,
+			corporate_number,
+			company_name,
+			reg_date,
+			last_login
+		) values
+		(
+			#{idx},
+			#{name},
+			#{userid},
+			#{birth_day},
+			#{password},
+			#{email},
+			#{phone_number},
+			#{sms},
+			#{email_agree},
+			#{account_bank},
+			#{account_number},
+			#{sex},
+			#{corporate_number},
+			#{company_name},
+			#{reg_date},
+			#{last_login}
+		)
+	</insert>
+
+	<update id="updateUserInfo" parameterType="eney.domain.UserVO">
+		update n_user_info
+			<set>
+				<if test="auth != null">
+					auth = #{auth},
+				</if>
+				<if test="type != null">
+					type = #{type},
+				</if>
+				<if test="epoint != null">
+					epoint = #{epoint},
+				</if>
+				<if test="image_src != null">
+					image_src = #{image_src},
+				</if>
+			</set>
+			<where>
+				userid = #{userid}
+			</where>
+	</update>
+
+	<delete id="deleteUser" parameterType="eney.domain.UserVO">
+		delete from n_user where userid = #{userid}
+	</delete>
+
+	<update id="deletePatchcall" parameterType="eney.domain.UserVO">
+		update n_service_patchcall set status = 'deleted' where userid = #{userid}
+	</update>
+	<update id="deletePatchcallOther" parameterType="eney.domain.UserVO">
+		update n_service_patchcall_other set status = 'deleted' where userid = #{userid}
+	</update>
+	<update id="deleteRecord" parameterType="eney.domain.UserVO">
+		update n_service_record set status = 'deleted'  where userid = #{userid}
+	</update>
+	<update id="deleteServer" parameterType="eney.domain.UserVO">
+		update n_service_server set status = 'deleted' where userid = #{userid}
+	</update>
+	<update id="deleteVpn" parameterType="eney.domain.UserVO">
+		update n_service_vpn set status = 'deleted' where userid = #{userid}
+	</update>
+	<update id="deleteWeb" parameterType="eney.domain.UserVO">
+		update n_service_web set status = 'deleted' where userid = #{userid}
+	</update>
+	<update id="deleteCallback" parameterType="eney.domain.UserVO">
+		update n_service_callback_sms set status = 'deleted' where userid = #{userid}
+	</update>
+	<update id="deletePatcahcallDashboard" parameterType="eney.domain.UserVO">
+		update n_service_patchcall_dashboard set status = 'deleted' where userid = #{userid} and status = "using"
+	</update>
+
+	<update id="deletePatcahInteligence" parameterType="eney.domain.ServicePatchcallVO">
+		update n_service_patch_intelligence set status = 'deleted' where userid = #{userid} and service_type = #{service_type} and status = "using"
+	</update>
+	<update id="deleteCloud" parameterType="eney.domain.ServicePatchcallVO">
+		update n_service_cloud set status = 'deleted' where userid = #{userid} and service_type = #{service_type} and status = "using"
+	</update>
+	<update id="delete3rdPart" parameterType="eney.domain.ServicePatchcallVO">
+		update n_service_3rdPart set status = 'deleted' where userid = #{userid} and service_type = #{service_type} and status = "using"
+	</update>
+
+	<update id="deleteGeneralDirectory" parameterType="eney.domain.ServicePatchcallVO">
+		update n_service_general_directory set status = 'deleted' where userid = #{userid} and service_type = #{service_type} and status = "using"
+	</update>
+
+	<select id="selectWebHostingService" parameterType="java.lang.Integer" resultType="eney.domain.ServiceWebHostingVO">
+		select * from n_service_web where web_hosting_idx = #{web_hosting_idx}
+	</select>
+	<select id="selectPatchcallService" parameterType = "java.lang.Integer" resultType="eney.domain.ServicePatchcallVO">
+		select * from n_service_patchcall where patchcall_idx = #{patchcall_idx}
+	</select>
+	<select id="selectPatchcallEtcService" parameterType = "java.lang.Integer" resultType="eney.domain.ServicePatchcallOtherVO">
+		select * from n_service_patchcall_other where idx = #{idx}
+	</select>
+	<select id="selectCallbackSmsService" parameterType = "java.lang.Integer" resultType="eney.domain.CallbackSmsVO">
+		select * from n_service_callback_sms where idx = #{idx}
+	</select>
+
+	<select id="selectPatchcallEtcServiceByUserid" parameterType = "eney.domain.ServicePatchcallOtherVO" resultType="eney.domain.ServicePatchcallOtherVO">
+		select * from n_service_patchcall_other where userid = #{userid}
+	</select>
+
+	<select id="selectPatchcallDashBoardByUserid" parameterType = "eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallDashBoardVO">
+		select * from n_service_patchcall_dashboard where userid = #{userid} and status = "using"
+	</select>
+
+	<insert id = "insertRecord" parameterType="eney.domain.RecordVO">
+		insert into
+			n_service_record(
+				userid,
+				service_type,
+				service_amount,
+				service_period,
+				pay_way,
+				end_date,
+				pay_state,
+				reg_date
+			)
+		values (
+			#{userid},
+			#{service_type},
+			#{service_amount},
+			#{service_period},
+			<if test="pay_way == 'credit'">"신용카드"</if>
+			<if test="pay_way == 'epoint'">"포인트"</if>
+			<if test="pay_way == 'account_transfer'">"계좌이체"</if>
+			<if test="pay_way == 'auto_transfer'">"자동이체"</if>
+			<if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>,
+			#{end_date},
+			#{pay_state},
+			sysdate()
+		)
+		<selectKey resultType="int" keyProperty="idx" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
+	<select id="selectRecordServiceListByUserVO" parameterType = "eney.domain.RecordVO" resultType="eney.domain.RecordVO">
+		select * from n_service_record where userid = #{userid} AND status = "using"
+	</select>
+	<select id="selectRecordService" parameterType = "eney.domain.RecordVO" resultType="eney.domain.RecordVO">
+		select * from n_service_record where idx = #{idx}
+	</select>
+	<select id="selectCallbackSmsServiceListByUserVO" parameterType = "eney.domain.CallbackSmsVO" resultType="eney.domain.CallbackSmsVO">
+		select * from n_service_callback_sms sms
+		join t_agent_ivr ivr
+		on sms.userid = ivr.user_id
+		where sms.userid = #{userid} and ivr.sms_yn = 'Y'
+	</select>
+
+	<select id="selectPatchInteligenceByUserVO" parameterType = "eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+		select * from n_service_patch_intelligence where userid = #{userid} AND status = "using" AND service_type = #{service_type}
+	</select>
+	<select id="selectCloudByUserVO" parameterType = "eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+		select * from n_service_cloud where userid = #{userid} AND status = "using" AND service_type = #{service_type}
+	</select>
+	<select id="select3rdPartByUserVO" parameterType = "eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+		select * from n_service_3rdpart where userid = #{userid} AND status = "using" AND service_type = #{service_type}
+	</select>
+
+	<select id="selectGeneralDirectoryByUserVO" parameterType = "eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+		select * from n_service_general_directory where userid = #{userid} AND status = "using" AND service_type = #{service_type}
+	</select>
+
+
+	<select id="checkCallbackSmsService" parameterType = "eney.domain.CallbackSmsVO" resultType="eney.domain.CallbackSmsVO">
+		select * from n_service_callback_sms
+		where userid = #{userid} AND status = "using"
+	</select>
+
+	<select id='getUserEvent' parameterType="eney.domain.UserEventVO" resultType="eney.domain.UserEventVO">
+		select * from n_user_event where userid = #{userid}
+	</select>
+	<insert id="insertPatchcall" parameterType="eney.domain.ServicePatchcallVO">
+		insert into
+			n_service_patchcall (
+				userid,
+				username,
+				service_type,
+				service_amount,
+				service_vat,
+				number_amount,
+				patchcall_purpose,
+				p_service,
+				service_period,
+				pay_way,
+				publish_email,
+				end_date,
+				pay_state,
+				reg_date
+			)
+		values (
+			#{userid},
+			#{username},
+			<if test="service_type == 'one'">"패치콜 one"</if>
+			<if test="service_type == 'single'">"패치콜 single"</if>
+			<if test="service_type == 'double'">"패치콜 double"</if>
+			<if test="service_type == 'support'">"패치콜 support"</if>
+			<if test="service_type == 'startup'">"패치콜 startup"</if>
+			<if test="service_type == 'business'">"패치콜 business"</if>
+			<if test="service_type == 'enterprise'">"패치콜 enterprise"</if>
+			<if test="service_type == 'test'">"패치콜 TEST"</if>,
+			#{service_amount},
+			#{service_vat},
+			 #{number_amount},
+			#{patchcall_purpose},
+			#{p_service},
+			#{service_period},
+			<if test="pay_way == 'credit'">"신용카드"</if>
+			<if test="pay_way == 'epoint'">"포인트"</if>
+			<if test="pay_way == 'account_transfer'">"계좌이체"</if>
+			<if test="pay_way == 'auto_transfer'">"자동이체"</if>
+			<if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>
+			<if test="pay_way == 'test'">"테스트"</if>,
+			#{publish_email},
+			#{end_date},
+			#{pay_state},
+			sysdate()
+		)
+		<selectKey resultType="int" keyProperty="patchcall_idx" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
+
+	<insert id="insertBI" parameterType="eney.domain.ServiceBIVO">
+		insert into
+		n_service_bi (
+		userid,
+		username,
+		service_type,
+		service_amount,
+		service_vat,
+		category_idx,
+		service_period,
+		pay_way,
+		corporate_address,
+		ceo_name,
+		publish_email,
+		end_date,
+		pay_state,
+		reg_date
+		)
+		values (
+		#{userid},
+		#{username},
+		<if test="service_type == 'small_bird'">"패치콜BI Small Bird"</if>
+		<if test="service_type == 'middle_cat'">"패치콜BI Middle Cat"</if>
+		<if test="service_type == 'big_bear'">"패치콜BI Big Bear"</if>
+		<if test="service_type == 'giant_penguin'">"패치콜BI Giant Penguin"</if>,
+		#{service_amount},
+		#{service_vat},
+		#{category_idx},
+		#{service_period},
+		<if test="pay_way == 'credit'">"신용카드"</if>
+		<if test="pay_way == 'epoint'">"포인트"</if>
+		<if test="pay_way == 'account_transfer'">"계좌이체"</if>
+		<if test="pay_way == 'auto_transfer'">"자동이체"</if>
+		<if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>,
+		#{corporate_address},
+		#{ceo_name},
+		#{publish_email},
+		#{end_date},
+		#{pay_state},
+		sysdate()
+		)
+		<selectKey resultType="int" keyProperty="idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<insert id ="insertPatchcallOther" parameterType="eney.domain.ServicePatchcallOtherVO">
+		insert into
+			n_service_patchcall_other(
+				userid,
+				username,
+				service_type,
+				service_amount,
+				service_vat,
+				p_service,
+				expect_number,
+				service_period,
+				pay_way,
+				corporate_address,
+				ceo_name,
+				publish_email,
+				end_date,
+				pay_state,
+				reg_date
+		)
+		values (
+			  #{userid},
+			  #{username},
+			  <if test="service_type == 'general_number'">"대표번호"</if>
+			  <if test="service_type == 'number080'">"080 수신자부담번호"</if>,
+		      #{service_amount},
+			  #{service_vat},
+			  #{p_service},
+			  #{expect_number},
+		      #{service_period},
+			  <if test="pay_way == 'credit'">"신용카드"</if>
+			  <if test="pay_way == 'epoint'">"포인트"</if>
+			  <if test="pay_way == 'account_transfer'">"계좌이체"</if>
+		      <if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>
+			  <if test="pay_way == 'auto_transfer'">"자동이체"</if>,
+			  #{corporate_address},
+			  #{ceo_name},
+		      #{publish_email},
+		      #{end_date},
+		      #{pay_state},
+		      sysdate()
+		)
+		<selectKey resultType="int" keyProperty="idx" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
+	<insert id = "insertCallbacksms" parameterType="eney.domain.ServicePatchcallOtherVO">
+		insert into
+			n_service_callback_sms(
+				userid,
+				username,
+				service_type,
+				service_amount,
+				service_vat,
+				service_period,
+				pay_way,
+				corporate_address,
+				ceo_name,
+				pay_state,
+				publish_email,
+				end_date,
+				reg_date
+		)
+		values (
+			#{userid},
+			#{username},
+			'콜백SMS',
+			#{service_amount},
+			#{service_vat},
+			#{service_period},
+			<if test="pay_way == 'credit'">"신용카드"</if>
+			<if test="pay_way == 'epoint'">"포인트"</if>
+			<if test="pay_way == 'account_transfer'">"계좌이체"</if>
+			<if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>
+			<if test="pay_way == 'auto_transfer'">"자동이체"</if>,
+			#{corporate_address},
+			#{ceo_name},
+			#{pay_state},
+			#{publish_email},
+			#{end_date},
+			sysdate()
+
+		)
+		<selectKey resultType="int" keyProperty="idx" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
+	<insert id ="insertPatchcallDashBoard" parameterType="eney.domain.ServicePatchcallVO">
+		insert into
+		n_service_patchcall_dashboard(
+		userid,
+		username,
+		service_amount,
+		service_vat,
+		service_period,
+		pay_way,
+		end_date,
+		pay_state,
+		reg_date
+		)
+		values (
+		#{userid},
+		#{username},
+		#{service_amount},
+		#{service_vat},
+		#{service_period},
+		<if test="pay_way == 'credit'">"신용카드"</if>
+		<if test="pay_way == 'epoint'">"포인트"</if>
+		<if test="pay_way == 'account_transfer'">"계좌이체"</if>
+		<if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>
+		<if test="pay_way == 'auto_transfer'">"자동이체"</if>,
+		#{end_date},
+		#{pay_state},
+		sysdate()
+		)
+		<selectKey resultType="int" keyProperty="idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	<insert id = "insertPatchInteligence" parameterType="eney.domain.ServicePatchcallVO">
+		insert into
+		n_service_patch_intelligence(
+		userid,
+		service_type,
+		service_amount,
+		service_period,
+		pay_way,
+		end_date,
+		pay_state,
+		reg_date
+		)
+		values (
+		#{userid},
+		#{service_type},
+		#{service_amount},
+		#{service_period},
+		<if test="pay_way == 'credit'">"신용카드"</if>
+		<if test="pay_way == 'epoint'">"포인트"</if>
+		<if test="pay_way == 'account_transfer'">"계좌이체"</if>
+		<if test="pay_way == 'auto_transfer'">"자동이체"</if>
+		<if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>,
+		#{end_date},
+		#{pay_state},
+		sysdate()
+		)
+		<selectKey resultType="int" keyProperty="idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	<insert id = "insertCloud" parameterType="eney.domain.ServicePatchcallVO">
+		insert into
+		n_service_cloud(
+		userid,
+		service_type,
+		service_amount,
+		service_period,
+		pay_way,
+		end_date,
+		pay_state,
+		reg_date
+		)
+		values (
+		#{userid},
+		#{service_type},
+		#{service_amount},
+		#{service_period},
+		<if test="pay_way == 'credit'">"신용카드"</if>
+		<if test="pay_way == 'epoint'">"포인트"</if>
+		<if test="pay_way == 'account_transfer'">"계좌이체"</if>
+		<if test="pay_way == 'auto_transfer'">"자동이체"</if>
+		<if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>,
+		#{end_date},
+		#{pay_state},
+		sysdate()
+		)
+		<selectKey resultType="int" keyProperty="idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	<insert id = "insert3rdPart" parameterType="eney.domain.ServicePatchcallVO">
+		insert into
+		n_service_3rdpart(
+		userid,
+		service_type,
+		service_amount,
+		service_period,
+		pay_way,
+		end_date,
+		pay_state,
+		reg_date
+		)
+		values (
+		#{userid},
+		#{service_type},
+		#{service_amount},
+		#{service_period},
+		<if test="pay_way == 'credit'">"신용카드"</if>
+		<if test="pay_way == 'epoint'">"포인트"</if>
+		<if test="pay_way == 'account_transfer'">"계좌이체"</if>
+		<if test="pay_way == 'auto_transfer'">"자동이체"</if>
+		<if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>,
+		#{end_date},
+		#{pay_state},
+		sysdate()
+		)
+		<selectKey resultType="int" keyProperty="idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<insert id = "insertGeneralDirectory" parameterType="eney.domain.ServicePatchcallVO">
+		insert into
+		n_service_general_directory(
+		userid,
+		service_type,
+		service_amount,
+		service_period,
+		pay_way,
+		end_date,
+		pay_state,
+		reg_date
+		)
+		values (
+		#{userid},
+		#{service_type},
+		#{service_amount},
+		#{service_period},
+		<if test="pay_way == 'credit'">"신용카드"</if>
+		<if test="pay_way == 'epoint'">"포인트"</if>
+		<if test="pay_way == 'account_transfer'">"계좌이체"</if>
+		<if test="pay_way == 'auto_transfer'">"자동이체"</if>
+		<if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>,
+		#{end_date},
+		#{pay_state},
+		sysdate()
+		)
+		<selectKey resultType="int" keyProperty="idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<insert id="insertWebHostingService" parameterType="eney.domain.ServiceWebHostingVO">
+		insert into
+			n_service_web (
+				userid,
+				username,
+				web_domain,
+				web_ip_address,
+				web_ftp_id,
+				web_ftp_pw,
+				web_db_id,
+				web_db_pw,
+				web_storage,
+				web_traffic,
+				service_type,
+				service_amount,
+				service_vat,
+				service_period,
+				pay_way,
+				corporate_address,
+				ceo_name,
+				publish_email,
+				end_date,
+				pay_state,
+				reg_date
+			)
+		values (
+			#{userid},
+			#{username},
+			#{web_domain},
+			#{web_ip_address},
+			#{web_ftp_id},
+			#{web_ftp_pw},
+			#{web_db_id},
+			#{web_db_pw},
+			'5G',
+			'UNLIMIT',
+			<if test="service_type == 'standard'">"웹호스팅 standard"</if>
+			<if test="service_type == 'support'">"웹호스팅 support"</if>
+			<if test="service_type == 'premium'">"웹호스팅 premium"</if>
+			#{service_amount},
+			#{service_vat},
+			#{service_period},
+			<if test="pay_way == 'credit'">"신용카드"</if>
+			<if test="pay_way == 'epoint'">"포인트"</if>
+			<if test="pay_way == 'account_transfer'">"계좌이체"</if>
+			<if test="pay_way == 'card_auto_transfer'">"신용카드 자동이체"</if>
+			<if test="pay_way == 'auto_transfer'">"자동이체"</if>,
+			#{corporate_address},
+			#{ceo_name},
+			#{publish_email},
+			#{end_date},
+			#{pay_state},
+			sysdate()
+		)
+		<selectKey resultType="int" keyProperty="web_hosting_idx" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
+	<insert id="insertVpnInfo" parameterType="eney.domain.ServiceVpnHostingVO">
+		insert into
+			n_service_vpn (
+				userid,
+				vpn_install_address,
+				vpn_ip_address,
+				reg_date
+			)
+		values (
+			#{userid},
+			#{vpn_install_address},
+			#{vpn_ip_address},
+			sysdate()
+		)
+	</insert>
+	<update id="updatePatchcallService" parameterType="eney.domain.ServicePatchcallVO">
+		UPDATE n_service_patchcall
+		SET
+			pay_state = #{pay_state}
+		WHERE
+			patchcall_idx = #{patchcall_idx}
+	</update>
+	<update id="updateCallbackSMS" parameterType="eney.domain.CallbackSmsVO">
+		UPDATE n_service_callback_sms
+		SET
+			pay_state = #{pay_state}
+		WHERE
+			idx = #{idx}
+	</update>
+
+	<update id="updateCallbackSMSInfo" parameterType="eney.domain.CallbackSmsVO">
+		UPDATE n_service_callback_sms
+		SET
+		<choose>
+			<when test="pay_way == 'credit'">
+				pay_way = "신용카드",
+			</when>
+			<when test="pay_way == 'epoint'">
+				pay_way = "포인트",
+			</when>
+			<when test="pay_way == 'account_transfer'">
+				pay_way = "계좌이체",
+			</when>
+			<when test="pay_way == 'auto_transfer'">
+				pay_way = "자동이체",
+			</when>
+			<when test="pay_way == 'card_auto_transfer'">
+				pay_way = "신용카드 자동이체",
+			</when>
+		</choose>
+			reg_date = now(),
+			end_date = #{end_date}
+		WHERE
+			userid = #{userid}
+	</update>
+
+	<update id="updatePatchcallDashBoard" parameterType="eney.domain.ServicePatchcallVO">
+		UPDATE n_service_patchcall_dashboard
+		SET
+		<choose>
+			<when test="pay_way == 'credit'">
+				pay_way = "신용카드",
+			</when>
+			<when test="pay_way == 'epoint'">
+				pay_way = "포인트",
+			</when>
+			<when test="pay_way == 'account_transfer'">
+				pay_way = "계좌이체",
+			</when>
+			<when test="pay_way == 'auto_transfer'">
+				pay_way = "자동이체",
+			</when>
+			<when test="pay_way == 'card_auto_transfer'">
+				pay_way = "신용카드 자동이체",
+			</when>
+		</choose>
+		reg_date = now(),
+		end_date = #{end_date}
+		WHERE
+		userid = #{userid}
+	</update>
+
+	<update id="updateRecord" parameterType="eney.domain.RecordVO">
+		UPDATE n_service_record
+		SET
+			pay_state = #{pay_state}
+		WHERE
+			idx = #{idx}
+	</update>
+
+	<update id="updatePatchcallOtherService" parameterType="eney.domain.ServicePatchcallOtherVO">
+		UPDATE n_service_patchcall_other
+		SET
+			pay_state = #{pay_state}
+		WHERE
+			idx = #{idx}
+	</update>
+	<update id="updateWebHostingService" parameterType="eney.domain.ServiceWebHostingVO">
+		UPDATE n_service_web
+		SET
+			pay_state = #{pay_state}
+		WHERE
+			web_hosting_idx = #{web_hosting_idx}
+	</update>
+
+	<update id="updatePatchcallBi" parameterType="eney.domain.ServiceBIVO">
+		UPDATE n_service_bi
+		SET
+			pay_state = #{pay_state}
+		WHERE
+			idx = #{idx}
+	</update>
+
+	<select id="getUserCerityByUser_cretify_idx" parameterType="Integer" resultType="eney.domain.UserCertifyVo">
+		SELECT user_cretify_idx, ceritfy_status, ceritfy_type, ci, di, mobil_id, sign_date, name, phone_number, comm_id, socialno, sex, foreigner, mstr, result_cd, result_msg, timestamp
+		FROM n_user_certify
+		WHERE user_cretify_idx = #{user_cretify_idx}
+	</select>
+
+	<insert id="insertUserCerity" parameterType="eney.domain.UserCertifyVo">
+		INSERT INTO n_user_certify
+		(
+			ceritfy_status,
+			ceritfy_type,
+			ci,
+			di,
+			mobil_id,
+			sign_date,
+			name,
+			phone_number,
+			comm_id,
+			socialno,
+			sex,
+			foreigner,
+			mstr,
+			result_cd,
+			result_msg
+		)
+		VALUES
+		(
+			#{ceritfy_status,jdbcType=VARCHAR},
+			#{ceritfy_type,jdbcType=VARCHAR},
+			#{ci,jdbcType=VARCHAR},
+			#{di,jdbcType=VARCHAR},
+			#{mobil_id,jdbcType=VARCHAR},
+			#{sign_date,jdbcType=VARCHAR},
+			#{name,jdbcType=VARCHAR},
+			#{phone_number,jdbcType=VARCHAR},
+			#{comm_id,jdbcType=VARCHAR},
+			#{socialno,jdbcType=VARCHAR},
+			#{sex,jdbcType=VARCHAR},
+			#{foreigner,jdbcType=VARCHAR},
+			#{mstr,jdbcType=VARCHAR},
+			#{result_cd,jdbcType=VARCHAR},
+			#{result_msg,jdbcType=VARCHAR}
+		)
+
+		<selectKey resultType="int" keyProperty="user_cretify_idx" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
+
+	<update id="updateUserCerity" parameterType="eney.domain.UserCertifyVo">
+		UPDATE n_user_certify
+		SET
+			ceritfy_status = #{ceritfy_status},
+			ceritfy_type = #{ceritfy_type},
+			ci = #{ci},
+			di = #{di},
+			mobil_id = #{mobil_id},
+			sign_date = #{sign_date},
+			name = #{name},
+			phone_number = #{phone_number},
+			comm_id = #{comm_id},
+			socialno = #{socialno},
+			sex = #{sex},
+			foreigner = #{foreigner},
+			mstr = #{mstr},
+			result_cd = #{result_cd},
+			result_msg = #{result_msg}
+		WHERE
+			user_cretify_idx = #{user_cretify_idx}
+	</update>
+
+	<select id = "getInvoicePdf" parameterType = "Integer" resultType = "eney.domain.UserInvoiceVO">
+		SELECT *
+		FROM n_user_invoice user
+		LEFT JOIN n_invoice_content content ON user.invoice_idx = content.invoice_idx
+		WHERE user.invoice_idx = #{idx}
+		ORDER BY date(end_date) asc,reg_date asc
+	</select>
+
+	<select id = "getInvoiceByIdx" parameterType = "Integer" resultType = "eney.domain.UserInvoiceVO">
+		SELECT *
+		FROM  n_invoice_content
+		WHERE idx = #{idx}
+	</select>
+
+
+	<select id = "getInvoicePdfGroupBy" parameterType = "Integer" resultType = "eney.domain.UserInvoiceVO">
+		SELECT *
+		FROM n_user_invoice user
+		LEFT JOIN n_invoice_content content ON user.invoice_idx = content.invoice_idx
+		WHERE user.invoice_idx = #{idx}
+		GROUP BY user.invoice_idx
+	</select>
+
+	<select id="getServiceListAll" parameterType = "eney.domain.ServicePatchcallVO" resultType="eney.domain.UserInvoiceVO">
+		SELECT *
+		FROM getapplyservicelist
+		WHERE userid = #{userid}
+	</select>
+
+	<select id="getServiceApplyListById" parameterType = "java.lang.String" resultType="eney.domain.ServiceApplyVO">
+		select
+		*
+		from
+		(
+		select
+		@num:=@num+1 rownum,
+		E.*
+		from
+		(SELECT @num:=0) D,
+		(select * from n_service_apply
+		where userid=#{userid}
+		order by idx desc
+		) E
+		) Z
+		<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+			where Z.rownum between #{startRowNo} and #{endRowNo}
+		</if>
+		order by idx desc
+	</select>
+
+	<select id="getServiceApplyCnt" parameterType = "eney.domain.ServiceApplyVO" resultType="java.lang.Integer">
+		SELECT count(*)
+		FROM n_service_apply
+		WHERE userid = #{userid}
+	</select>
+
+	<insert id="insertMessage" parameterType ="eney.domain.ServiceMessagingVO">
+		INSERT INTO n_service_message (userid, ip, reg_date)
+		VALUES(#{userid}, #{ip}, sysdate())
+	</insert>
+
+	<select id="getUserIpForUserVO" parameterType = "eney.domain.ServiceMessagingVO" resultType="eney.domain.ServiceMessagingVO">
+		SELECT *
+		FROM n_service_message
+		WHERE userid = #{userid}
+	</select>
+
+	<select id="getExpiredServicePatchcallList" resultType="eney.domain.ServicePatchcallVO">
+		<![CDATA[select * from n_service_patchcall where end_date < now()]]>
+	</select>
+	<select id="getExpiredServiceWebHostingList" resultType="eney.domain.ServiceWebHostingVO">
+		<![CDATA[select * from n_service_web where end_date < now()]]>
+	</select>
+	<select id="getExpiredServicePatchcallOtherList" resultType="eney.domain.ServicePatchcallOtherVO">
+		<![CDATA[select * from n_service_patchcall_other where end_date < now()]]>
+	</select>
+	<select id="getExpiredServiceRecordList" resultType="eney.domain.RecordVO">
+		<![CDATA[select * from n_service_record where end_date < now()]]>
+	</select>
+
+	<update id="updateServicePatchcallStatus" parameterType="java.util.Map">
+		<foreach collection="list" item="map" index="index" separator=";">
+			UPDATE n_service_patchcall
+			SET
+				status = 'deleted'
+			WHERE
+				patchcall_idx = #{map.value}
+    	</foreach>
+	</update>
+
+	<update id="updateServiceWebHostingStatus" parameterType="java.util.Map">
+		<foreach collection="list" item="map" index="index" separator=";">
+			UPDATE n_service_web
+			SET
+				status = 'deleted'
+			WHERE
+				web_hosting_idx = #{map.value}
+    	</foreach>
+	</update>
+
+	<update id="updateServicePatchcallOtherStatus" parameterType="java.util.Map">
+		<foreach collection="list" item="map" index="index" separator=";">
+			UPDATE n_service_patchcall_other
+			SET
+				status = 'deleted'
+			WHERE
+				idx = #{map.value}
+    	</foreach>
+	</update>
+
+	<update id="updateServiceRecordStatus" parameterType="java.util.Map">
+		<foreach collection="list" item="map" index="index" separator=";">
+			UPDATE n_service_record
+			SET
+				status = 'deleted'
+			WHERE
+				idx = #{map.value}
+    	</foreach>
+	</update>
+
+	<update id="updateServiceCallbackSmsStatus" parameterType="java.util.Map">
+		<foreach collection="list" item="map" index="index" separator=";">
+			UPDATE n_service_callback_sms
+			SET
+				status = 'deleted'
+			WHERE
+				idx = #{map.value}
+    	</foreach>
+	</update>
+	<select id="getUserServiceListByUserid" parameterType="eney.domain.ServiceListVO" resultType="eney.domain.ServiceListVO">
+		SELECT * FROM getapplyservicelist
+			where userid = #{userid}
+	</select>
+	<insert id="issueingTicket" parameterType="eney.domain.UserEventVO">
+	    insert into n_user_event
+	    (userid,ticket_number,ticket_date)
+	    values (#{userid},#{ticket_number},NOW())
+  </insert>
+  <select id ="getTicket" parameterType="eney.domain.UserEventVO" resultType="eney.domain.UserEventVO">
+    select * from n_user_event where userid = #{userid} order by idx desc limit 1
+  </select>
+
+	<select id ="selectMessageVO" parameterType="eney.domain.ServiceMessagingVO" resultType="eney.domain.ServiceMessagingVO">
+		select * from n_service_message where userid = #{userid}
+	</select>
+
+	<select id ="getBiServiceList" parameterType="eney.domain.UserVO" resultType="eney.domain.ServiceBIVO">
+		select *
+		from n_service_bi
+		where userid = #{userid}
+	</select>
+
+	<select id = "getCategoryList" resultType="eney.domain.BiCategoryVO">
+		select *
+		from bi_category
+	</select>
+
+	<select id = "getBiService" parameterType="Integer" resultType="eney.domain.ServiceBIVO">
+		select *
+		from n_service_bi
+		where idx = #{idx}
+
+	</select>
+
+
+
+	<insert id = "insertBIInfo" parameterType="eney.domain.ServiceBIVO">
+		INSERT INTO n_bi_info(service_idx, user_id)
+		VALUES (#{idx}, #{userid})
+	</insert>
+
+	<update id = "updateCompanyName" parameterType = "eney.domain.UserVO">
+		update n_user
+		set company_name = #{company_name}
+		where userid = #{userid}
+	</update>
+
+	<update id = "updateCompanyKind" parameterType = "eney.domain.UserVO">
+		update n_user
+		set company_kind = #{company_kind}
+		where userid = #{userid}
+	</update>
+
+	<update id = "updateEmail" parameterType = "eney.domain.UserVO">
+		update n_user
+		set email = #{email}
+		where userid = #{userid}
+	</update>
+
+	<update id = "updateAddress" parameterType = "eney.domain.UserVO">
+		update n_user
+		set address = #{address} ,address_detail = #{address_detail} ,post_code = #{post_code}
+		where userid = #{userid}
+	</update>
+
+	<update id = "updatePhone" parameterType = "eney.domain.UserVO">
+		update n_user
+		set phone_number = #{phone_number}
+		where userid = #{userid}
+	</update>
+
+	<update id = "couponUse" parameterType = "eney.domain.CouponVO">
+		update coupon
+		set used = true,
+		used_date = SYSDATE(),
+		used_user = #{used_user}
+		where coupon_num = #{coupon_num}
+	</update>
+
+	<select id = "getCoupon" parameterType = "eney.domain.CouponVO" resultType="eney.domain.CouponVO">
+		select * from coupon
+		where coupon_num = #{coupon_num}
+	</select>
+
+</mapper>

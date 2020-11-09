@@ -1,0 +1,30 @@
+spring:
+  servlet:
+    multipart:
+      location: /usr/local/tomcat/upload
+
+#security:
+#  require-ssl: false
+    
+logging:
+#  config: classpath:/log4j-beta.xml
+  file : /var/log/eney_service
+    
+eney:
+  portal:         
+    portal-url: http://211.251.236.166:8080
+    portal-domain: 211.251.236.166:8080
+    api-token-len: 32
+    mail-host: localhost
+    mail-port: 25
+    file-properties:
+      fileLocation: /usr/local/tomcat/upload
+    payment-properties:
+      service-id: glx_api
+      giftcard-commission: 12
+      payment-request-url-prefix: http://tpay.billgate.net/
+      payment-request-url-suffix: /certify.jsp
+      return-url-prefix: http://211.251.236.166:8080/payment/
+      return-url-suffix: /return
+    user-certify-properties:
+      okurl: http://211.251.236.166:8080/userCertify/return

@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="ivr">
+    <select id="getCallLogCnt01" parameterType="eney.domain.CallLogVO"
+            resultType="java.lang.Integer">
+        SELECT SUM(count)
+        FROM
+        (
+        <foreach collection="TABLE_MONTH_LIST" item="MONTH" separator="UNION ALL">
+            select
+            count(*) AS count
+            from
+            t_cdr_${MONTH}
+            <where>
+                user_id = #{user_id}
+                <if test="agent_name != null and agent_name != ''">
+                    and agent_name like '%' #{agent_name} '%'
+                </if>
+                <if test="dong_name != null and dong_name != ''">
+                    and dong_name like '%' #{dong_name} '%'
+                </if>
+                <if test="ani != null and ani != ''">
+                    and ani = #{ani}
+                </if>
+                <if test="called_no != null and called_no != ''">
+                    and called_no = #{called_no}
+                </if>
+                <if test="dn != null and dn != ''">
+                    and dn = #{dn}
+                </if>
+                <if test="search_period_from != null and search_period_from != ''">
+                    and <![CDATA[cs_date >= #{search_period_from}]]>
+                </if>
+                <if test="search_period_to != null and search_period_to != ''">
+                    and <![CDATA[cs_date <= #{search_period_to}]]>
+                </if>
+                <if test="search_time_from != null and search_time_from != ''">
+                    AND <![CDATA[LEFT(cs_time,2) >= #{search_time_from}]]>
+                </if>
+                <if test="search_time_to != null and search_time_to != ''">
+                    AND <![CDATA[LEFT(cs_time,2) <= #{search_time_to}]]>
+                </if>
+                <if test="view_mode == 'today'">
+                    AND cs_date = date_format(CURRENT_TIMESTAMP(),'%Y%m%d')
+                </if>
+            </where>
+        </foreach>
+        ) as month_count
+    </select>
+
+	<select id="getCallLogCnt" parameterType="eney.domain.CallLogVO"
+		resultType="java.lang.Integer">
+		SELECT SUM(count)
+		FROM
+		(
+		<foreach collection="TABLE_MONTH_LIST" item="MONTH" separator="UNION ALL">
+			select
+			count(*) AS count
+			from
+			t_cdr_${MONTH}
+			<where>
+				<if test="user_id != null and user_id != '' and user_id != null and user_id != ''">
+					AND user_id = #{user_id}
+				</if>
+				<if test="searchFiled == 'user_id'">
+					AND user_id = #{searchValue}
+				</if>
+				<if test="searchFiled != null and searchFiled != '' and searchFiled != 'user_id'">
+					AND ${searchFiled} like '%' #{searchValue} '%'
+				</if>
+				<if test="startDate != null">
+					AND <![CDATA[date(cs_date) >= #{startDate}]]>
+				</if>
+				<if test="endDate != null">
+					AND <![CDATA[date(cs_date) <= #{endDate}]]>
+				</if>
+				<if test="view_mode == 'today'">
+					AND cs_date = date_format(CURRENT_TIMESTAMP(),'%Y%m%d')
+				</if>
+			</where>
+		</foreach>
+		) as month_count
+	</select>
+
+	<select id="getCallLogCntForAPI" parameterType="eney.domain.CallLogVO"
+			resultType="java.lang.Integer">
+		SELECT SUM(count)
+		FROM
+		(
+		<foreach collection="TABLE_MONTH_LIST" item="MONTH" separator="UNION ALL">
+			select
+			count(*) AS count
+			from
+			t_cdr_${MONTH} as t${MONTH}
+			<where>
+				t${MONTH}.user_id = #{user_id}
+				<if test="agent_name != null and agent_name != ''">
+					and agent_name like '%' #{agent_name} '%'
+				</if>
+				<if test="dong_name != null and dong_name != ''">
+					AND dong_name like '%' #{dong_name} '%'
+				</if>
+				<if test="ani != null and ani != ''">
+					AND ani = #{ani}
+				</if>
+				<if test="dn != null and dn != ''">
+					AND dn = #{dn}
+				</if>
+				<if test="called_no != null and called_no != ''">
+					AND called_no = #{called_no}
+				</if>
+				AND
+				STR_TO_DATE(concat(cs_date,cs_time), '%Y%m%d%H%i%s') BETWEEN STR_TO_DATE(concat(#{search_period_from},#{search_time_from}), '%Y%m%d%H%i%s') AND STR_TO_DATE(concat(#{search_period_to},#{search_time_to}), '%Y%m%d%H%i%s')
+				<if test="view_mode == 'today'">
+					AND cs_date = date_format(CURRENT_TIMESTAMP(),'%Y%m%d')
+				</if>
+			</where>
+		</foreach>
+		) as month_count
+	</select>
+	<select id="getCallLogList" parameterType="eney.domain.CallLogVO"
+			resultType="eney.domain.CallLogVO">
+		SELECT *
+		FROM
+		(
+		select
+		@num:=@num+1 rownum,
+		t_cdr.*
+		from
+		(SELECT @num:=0) D,
+		(
+		<foreach collection="TABLE_MONTH_LIST" item="MONTH" separator="UNION ALL">
+			SELECT
+			t${MONTH}.idx,
+			ani,
+			called_no,
+			cs_date,
+			cs_time,
+			ss_date,
+			ss_time,
+			se_date,
+			se_time,
+			call_duration,
+			svc_duration,
+			call_result,
+			dn,
+			dong_name,
+			agent_name,
+			t${MONTH}.user_id,
+			voice_file
+			FROM
+			t_cdr_${MONTH} as t${MONTH}
+ 			<!--left JOIN call_memo AS m${MONTH} ON m${MONTH}.log_index = t${MONTH}.idx -->
+			<where>
+				<if test="user_id != null and user_id != ''">
+					AND t${MONTH}.user_id = #{user_id}
+				</if>
+				<if test="searchFiled == 'user_id'">
+					AND t${MONTH}.user_id = #{searchValue}
+				</if>
+				<if test="searchFiled != null and searchFiled != '' and searchFiled != 'user_id'">
+					AND ${searchFiled} like '%' #{searchValue} '%'
+				</if>
+				<if test="startDate != null">
+					AND <![CDATA[date(cs_date) >= #{startDate}]]>
+				</if>
+				<if test="endDate != null">
+					AND <![CDATA[date(cs_date) <= #{endDate}]]>
+				</if>
+				<if test="view_mode == 'today'">
+					AND cs_date = date_format(CURRENT_TIMESTAMP(),'%Y%m%d')
+				</if>
+			</where>
+		</foreach>
+		)  t_cdr
+			ORDER BY cs_date DESC, cs_time DESC
+		)  E
+		<where>
+			<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+				E.rownum between #{startRowNo} and #{endRowNo}
+			</if>
+		</where>
+<!--		<if test="present_page != null and present_page != '' and view_mode != 'today'">-->
+<!--			LIMIT #{present_first_item_idx}, #{page_per_item_num}-->
+<!--		</if>-->
+	</select>
+
+    <select id="getCallLogListApi01" parameterType="eney.domain.CallLogVO"
+            resultType="eney.domain.CallLogVO">
+        SELECT *
+        FROM
+        (
+        select
+        @num:=@num+1 rownum,
+        t_cdr.*
+        from
+        (SELECT @num:=0) D,
+        (
+        <foreach collection="TABLE_MONTH_LIST" item="MONTH" separator="UNION ALL">
+            SELECT
+            ani,
+            called_no,
+            cs_date,
+            cs_time,
+            ss_date,
+            ss_time,
+            se_date,
+            se_time,
+            call_duration,
+            svc_duration,
+            call_result,
+            dn,
+            dong_name,
+            dong_yn,
+            agent_idx,
+            agent_name,
+            t${MONTH}.user_id,
+            voice_file
+            FROM
+            t_cdr_${MONTH} as t${MONTH}
+            <where>
+                user_id = #{user_id}
+                <if test="agent_name != null and agent_name != ''">
+                    and agent_name like '%' #{agent_name} '%'
+                </if>
+                <if test="dong_name != null and dong_name != ''">
+                    and dong_name like '%' #{dong_name} '%'
+                </if>
+                <if test="ani != null and ani != ''">
+                    and ani = #{ani}
+                </if>
+                <if test="called_no != null and called_no != ''">
+                    and called_no = #{called_no}
+                </if>
+                <if test="dn != null and dn != ''">
+                    and dn = #{dn}
+                </if>
+                <if test="search_period_from != null and search_period_from != ''">
+                    and <![CDATA[cs_date >= #{search_period_from}]]>
+                </if>
+                <if test="search_period_to != null and search_period_to != ''">
+                    and <![CDATA[cs_date <= #{search_period_to}]]>
+                </if>
+                <if test="search_time_from != null and search_time_from != ''">
+                    AND <![CDATA[LEFT(cs_time,2) >= #{search_time_from}]]>
+                </if>
+                <if test="search_time_to != null and search_time_to != ''">
+                    AND <![CDATA[LEFT(cs_time,2) <= #{search_time_to}]]>
+                </if>
+                <if test="view_mode == 'today'">
+                    AND cs_date = date_format(CURRENT_TIMESTAMP(),'%Y%m%d')
+                </if>
+            </where>
+        </foreach>
+        )  t_cdr
+        ORDER BY cs_date DESC, cs_time DESC
+        )  E
+        <where>
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                E.rownum between #{startRowNo} and #{endRowNo}
+            </if>
+        </where>
+    </select>
+
+
+	<select id="getCallLog" parameterType="java.util.Map"
+			resultType="eney.domain.CallLogVO">
+		select * from t_cdr_${month}
+		where dn = #{vno}
+		and cs_date = DATE_FORMAT(#{searchDate}, '%Y%m%d');
+		and cs_time = DATE_FORMAT(#{searchDate}, '%H%i%s');
+	</select>
+
+	<select id="getCallLogListAll" parameterType="eney.domain.CallLogVO"
+			resultType="java.util.LinkedHashMap">
+		SELECT *
+		FROM
+		(
+		<foreach collection="TABLE_MONTH_LIST" item="MONTH" separator="UNION ALL">
+			SELECT
+			agent_name,
+			dong_name,
+			ani,
+			called_no,
+			dn,
+			cs_date,
+			cs_time,
+			ss_time,
+			se_time,
+			svc_duration,
+			if( call_result = '0', '성공', '실패' ) as call_result
+			FROM
+			t_cdr_${MONTH}
+			<where>
+				user_id = #{user_id}
+				<if test="agent_name != null and agent_name != ''">
+					and agent_name like '%' #{agent_name} '%'
+				</if>
+				<if test="dong_name != null and dong_name != ''">
+					AND dong_name like '%' #{dong_name} '%'
+				</if>
+				<if test="ani != null and ani != ''">
+					AND ani = #{ani}
+				</if>
+				<if test="called_no != null and called_no != ''">
+					AND called_no = #{called_no}
+				</if>
+				<if test="dn != null and dn != ''">
+					AND dn = #{dn}
+				</if>
+
+				<if test="search_period_from != null and search_period_from != ''">
+					AND <![CDATA[cs_date >= #{search_period_from}]]>
+				</if>
+				<if test="search_period_to != null and search_period_to != ''">
+					AND <![CDATA[cs_date <= #{search_period_to}]]>
+				</if>
+			</where>
+		</foreach>
+		) AS t_cdr
+		ORDER BY cs_date DESC, cs_time DESC
+	</select>
+
+	<insert id="insertMemo" parameterType="java.util.HashMap">
+		insert into call_memo (vno, memo,user_id, log_index, reg_date, log_month)
+		values (#{vno}, #{memo},#{user_id}, #{log_index}, now(), #{month})
+	</insert>
+
+    <update id="updateMemo" parameterType="java.util.HashMap">
+		UPDATE call_memo
+		SET memo = #{memo}
+		WHERE idx = #{idx}
+
+	</update>
+
+	<delete id="deleteMemo" parameterType="java.util.HashMap">
+		delete from call_memo
+		where idx = #{idx}
+	</delete>
+
+	<select id="getMemo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT idx, vno, memo, user_id, log_index, date_format(reg_date,'%Y-%m-%d %h:%i:%s') as 'reg_date', log_month, last_update
+		from call_memo
+		where user_id = #{user_id}
+		and log_month = #{month}
+		and log_index = #{log_index}
+		order by idx asc;
+	</select>
+
+	<!-- * 교환기 상태 체크 * -->
+	<!-- 최근 50건의 교환 상태를 출력하는 쿼리 -->
+	<select id="getLast50CdrSummary" parameterType="java.lang.String" resultType="java.util.HashMap">
+	<![CDATA[
+		SELECT COUNT(1) as 'all',
+				COUNT(if(call_result=0, call_result, null)) AS connected,
+				COUNT(if(call_result!=0 && agent_idx!=0, call_result, null)) AS connect_failed,
+				COUNT(if(agent_idx=0, call_result, null)) AS agent_not_found
+		FROM
+			(
+				SELECT ani, called_no, cs_date, cs_time, call_result, in_channel, dn, agent_idx
+				FROM eney.t_cdr_${value}
+				ORDER BY cs_date DESC, cs_time DESC
+				limit 0, 50
+			) AS calllog;
+
+	]]>
+	</select>
+
+	<select id="getCallLogListSetTime" parameterType="eney.domain.CallLogVO"
+			resultType="eney.domain.CallLogVO">
+		SELECT *
+		FROM
+		(
+		select
+		@num:=@num+1 rownum,
+		t_cdr.*
+		from
+		(SELECT @num:=0) D,
+		(
+		<foreach collection="TABLE_MONTH_LIST" item="MONTH" separator="UNION ALL">
+			SELECT
+			ani,
+			called_no,
+			cs_date,
+			cs_time,
+			ss_date,
+			ss_time,
+			se_date,
+			se_time,
+			call_duration,
+			svc_duration,
+			call_result,
+			dn,
+			dong_name,
+			dong_yn,
+			agent_idx,
+			agent_name,
+			t${MONTH}.user_id,
+			voice_file
+			FROM
+			t_cdr_${MONTH} as t${MONTH}
+			<where>
+				t${MONTH}.user_id = #{user_id}
+				<if test="agent_name != null and agent_name != ''">
+					and agent_name like '%' #{agent_name} '%'
+				</if>
+				<if test="dong_name != null and dong_name != ''">
+					AND dong_name like '%' #{dong_name} '%'
+				</if>
+				<if test="ani != null and ani != ''">
+					AND ani = #{ani}
+				</if>
+				<if test="dn != null and dn != ''">
+					AND dn = #{dn}
+				</if>
+				<if test="called_no != null and called_no != ''">
+					AND called_no = #{called_no}
+				</if>
+				AND
+				STR_TO_DATE(concat(cs_date,cs_time), '%Y%m%d%H%i%s') BETWEEN STR_TO_DATE(concat(#{search_period_from},#{search_time_from}), '%Y%m%d%H%i%s') AND STR_TO_DATE(concat(#{search_period_to},#{search_time_to}), '%Y%m%d%H%i%s')
+				<if test="view_mode == 'today'">
+					AND cs_date = date_format(CURRENT_TIMESTAMP(),'%Y%m%d')
+				</if>
+			</where>
+		</foreach>
+		)  t_cdr
+		ORDER BY cs_date DESC, cs_time DESC
+		)  E
+		<where>
+			<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+				E.rownum between #{startRowNo} and #{endRowNo}
+			</if>
+		</where>
+	</select>
+</mapper>

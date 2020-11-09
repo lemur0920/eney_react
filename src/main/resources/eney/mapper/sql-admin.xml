@@ -1,0 +1,899 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="admin">
+	<resultMap id="WebHostingMap" type="eney.domain.ServiceWebHostingVO">
+		<id property="web_hosting_idx" column="web_hosting_idx"/>
+		<result property="userid" column="userid"/>
+		<result property="username" column="username"/>
+		<result property="web_domain" column="web_domain"/>
+		<result property="web_ip_address" column="web_ip_address"/>
+		<result property="web_ftp_id" column="web_ftp_id"/>
+		<result property="web_ftp_pw" column="web_ftp_pw"/>
+		<result property="web_db_id" column="web_db_id"/>
+		<result property="web_db_pw" column="web_db_pw"/>
+		<result property = "web_storage" column = "web_storage"/>
+		<result property = "web_traffic" column = "web_traffic"/>
+		<result property = "service_type" column = "service_type"/>
+		<result property = "service_period" column = "service_period"/>
+		<result property = "corporate_address" column = "corporate_address"/>
+		<result property = "ceo_name" column = "ceo_name"/>
+		<result property = "publish_email" column = "publish_email"/>
+		<result property = "end_date" column = "end_date"/>
+		<result property = "pay_state" column = "pay_state"/>
+		<result property = "generate_yn" column = "generate_yn"/>
+		<result property = "reg_date" column = "reg_date"/>
+		<result property = "note" column = "note"/>
+		<collection property="fileVO_list" ofType="eney.domain.FileVO">
+		    <id property="file_id" column="file_id"/>
+		    <result property="refer_id" column="refer_id"/>
+		    <result property="category" column="category"/>
+		    <result property="name" column="name"/>
+		    <result property="upload_name" column="upload_name"/>
+		    <result property="extenstion" column="extenstion"/>
+		    <result property="volume" column="volume"/>
+		</collection>
+	</resultMap>
+	<resultMap id="RecordMap" type="eney.domain.RecordVO">
+		<id property="idx" column="idx"/>
+		<result property="userid" column="userid"/>
+		<result property = "service_type" column = "service_type"/>
+		<result property = "service_period" column = "service_period"/>
+		<result property = "pay_way" column = "pay_way"/>
+		<result property = "corporate_address" column = "corporate_address"/>
+		<result property = "publish_email" column = "publish_email"/>
+		<result property = "ceo_name" column = "ceo_name"/>
+		<result property = "end_date" column = "end_date"/>
+		<result property = "pay_state" column = "pay_state"/>
+		<result property = "generate_yn" column = "generate_yn"/>
+		<result property = "reg_date" column = "reg_date"/>
+		<result property = "note" column = "note"/>
+		<collection property="fileVO_list" ofType="eney.domain.FileVO">
+		    <id property="file_id" column="file_id"/>
+		    <result property="refer_id" column="refer_id"/>
+		    <result property="category" column="category"/>
+		    <result property="name" column="name"/>
+		    <result property="upload_name" column="upload_name"/>
+		    <result property="extenstion" column="extenstion"/>
+		    <result property="volume" column="volume"/>
+		</collection>
+	</resultMap>
+	<resultMap id="CallbackMap" type="eney.domain.CallbackSmsVO">
+		<id property="idx" column="idx"/>
+		<result property="userid" column="userid"/>
+		<result property = "service_type" column = "service_type"/>
+		<result property = "service_period" column = "service_period"/>
+		<result property = "pay_way" column = "pay_way"/>
+		<result property = "corporate_address" column = "corporate_address"/>
+		<result property = "publish_email" column = "publish_email"/>
+		<result property = "ceo_name" column = "ceo_name"/>
+		<result property = "end_date" column = "end_date"/>
+		<result property = "pay_state" column = "pay_state"/>
+		<result property = "generate_yn" column = "generate_yn"/>
+		<result property = "reg_date" column = "reg_date"/>
+		<collection property="fileVO_list" ofType="eney.domain.FileVO">
+		    <id property="file_id" column="file_id"/>
+		    <result property="refer_id" column="refer_id"/>
+		    <result property="category" column="category"/>
+		    <result property="name" column="name"/>
+		    <result property="upload_name" column="upload_name"/>
+		    <result property="extenstion" column="extenstion"/>
+		    <result property="volume" column="volume"/>
+		</collection>
+	</resultMap>
+	<resultMap id="PatchcallMap" type="eney.domain.ServicePatchcallVO">
+		<id property="idx" column="patchcall_idx"/>
+		<result property="userid" column="userid"/>
+		<result property = "service_type" column = "service_type"/>
+		<result property = "number_amount" column = "number_amount"/>
+		<result property = "patchcall_purpose" column = "patchcall_purpose"/>
+		<result property = "username" column = "username"/>
+		<result property = "p_service" column = "p_service"/>
+		<result property = "service_period" column = "service_period"/>
+		<result property = "pay_way" column = "pay_way"/>
+		<result property = "corporate_address" column = "corporate_address"/>
+		<result property = "publish_email" column = "publish_email"/>
+		<result property = "ceo_name" column = "ceo_name"/>
+		<result property = "end_date" column = "end_date"/>
+		<result property = "pay_state" column = "pay_state"/>
+		<result property = "generate_yn" column = "generate_yn"/>
+		<result property = "reg_date" column = "reg_date"/>
+		<result property = "note" column = "note"/>
+		<collection property="fileVO_list" ofType="eney.domain.FileVO">
+		    <id property="file_id" column="file_id"/>
+		    <result property="refer_id" column="refer_id"/>
+		    <result property="category" column="category"/>
+		    <result property="name" column="name"/>
+		    <result property="upload_name" column="upload_name"/>
+		    <result property="extenstion" column="extenstion"/>
+		    <result property="volume" column="volume"/>
+		</collection>
+	</resultMap>
+
+	<resultMap id="ServiceApplyVOMap" type="eney.domain.ServiceApplyVO">
+		<id property="patchcall_idx" column="patchcall_idx"/>
+		<result property="userid" column="userid"/>
+		<result property = "service_type" column = "service_type"/>
+		<result property = "number_amount" column = "number_amount"/>
+		<result property = "patchcall_purpose" column = "patchcall_purpose"/>
+		<result property = "username" column = "username"/>
+		<result property = "p_service" column = "p_service"/>
+		<result property = "service_period" column = "service_period"/>
+		<result property = "pay_way" column = "pay_way"/>
+		<result property = "corporate_address" column = "corporate_address"/>
+		<result property = "publish_email" column = "publish_email"/>
+		<result property = "ceo_name" column = "ceo_name"/>
+		<result property = "end_date" column = "end_date"/>
+		<result property = "pay_state" column = "pay_state"/>
+		<result property = "generate_yn" column = "generate_yn"/>
+		<result property = "reg_date" column = "reg_date"/>
+		<result property = "note" column = "note"/>
+		<collection property="fileVO_list" ofType="eney.domain.FileVO">
+			<id property="file_id" column="file_id"/>
+			<result property="refer_id" column="refer_id"/>
+			<result property="category" column="category"/>
+			<result property="name" column="name"/>
+			<result property="upload_name" column="upload_name"/>
+			<result property="extenstion" column="extenstion"/>
+			<result property="volume" column="volume"/>
+		</collection>
+	</resultMap>
+
+	<resultMap id="OtherMap" type="eney.domain.ServicePatchcallOtherVO">
+		<id property="idx" column="idx"/>
+		<result property="userid" column="userid"/>
+		<result property="username" column="username"/>
+		<result property = "service_type" column = "service_type"/>
+		<result property = "p_service" column = "p_service"/>
+		<result property = "service_period" column = "service_period"/>
+		<result property = "pay_way" column = "pay_way"/>
+		<result property = "corporate_address" column = "corporate_address"/>
+		<result property = "publish_email" column = "publish_email"/>
+		<result property = "ceo_name" column = "ceo_name"/>
+		<result property = "end_date" column = "end_date"/>
+		<result property = "pay_state" column = "pay_state"/>
+		<result property = "generate_yn" column = "generate_yn"/>
+		<result property = "reg_date" column = "reg_date"/>
+		<result property = "note" column = "note"/>
+		<collection property="fileVO_list" ofType="eney.domain.FileVO">
+		    <id property="file_id" column="file_id"/>
+		    <result property="refer_id" column="refer_id"/>
+		    <result property="category" column="category"/>
+		    <result property="name" column="name"/>
+		    <result property="upload_name" column="upload_name"/>
+		    <result property="extenstion" column="extenstion"/>
+		    <result property="volume" column="volume"/>
+		</collection>
+	</resultMap>
+	<resultMap id="BiMap" type="eney.domain.ServiceBIVO">
+		<id property="idx" column="idx"/>
+		<result property="userid" column="userid"/>
+		<result property="username" column="username"/>
+		<result property = "service_type" column = "service_type"/>
+		<result property = "category_idx" column = "category_idx"/>
+		<result property = "service_period" column = "service_period"/>
+		<result property = "pay_way" column = "pay_way"/>
+		<result property = "corporate_address" column = "corporate_address"/>
+		<result property = "publish_email" column = "publish_email"/>
+		<result property = "ceo_name" column = "ceo_name"/>
+		<result property = "end_date" column = "end_date"/>
+		<result property = "pay_state" column = "pay_state"/>
+		<result property = "generate_yn" column = "generate_yn"/>
+		<result property = "reg_date" column = "reg_date"/>
+		<result property = "note" column = "note"/>
+		<result property="api_key" column="api_key"/>
+		<collection property="fileVO_list" ofType="eney.domain.FileVO">
+			<id property="file_id" column="file_id"/>
+			<result property="refer_id" column="refer_id"/>
+			<result property="category" column="category"/>
+			<result property="name" column="name"/>
+			<result property="upload_name" column="upload_name"/>
+			<result property="extenstion" column="extenstion"/>
+			<result property="volume" column="volume"/>
+		</collection>
+	</resultMap>
+
+	<resultMap id="BiInfoMap" type="eney.domain.BiInfoVO">
+		<id property="idx" column="idx"/>
+		<result property="service_idx" column="service_idx"/>
+		<result property="user_id" column="user_id"/>
+		<result property = "account_id" column = "account_id"/>
+		<result property = "tracking_id" column = "tracking_id"/>
+		<result property = "view_id" column = "view_id"/>
+		<result property = "table_id" column = "table_id"/>
+		<result property = "file_name" column = "file_name"/>
+		<result property = "reg_date" column = "reg_date"/>
+		<result property = "status" column = "status"/>
+		<collection property="fileVO_list" ofType="eney.domain.FileVO">
+			<id property="file_id" column="file_id"/>
+			<result property="refer_id" column="refer_id"/>
+			<result property="category" column="category"/>
+			<result property="name" column="name"/>
+			<result property="upload_name" column="upload_name"/>
+			<result property="extenstion" column="extenstion"/>
+			<result property="volume" column="volume"/>
+		</collection>
+	</resultMap>
+
+
+	<select id = "getSearchIdList" parameterType = "eney.domain.UserVO" resultType = "eney.domain.UserVO">
+		select * from n_user
+		<where>
+	 		<if test="search_cate_id != '' and search_cate_id != null">
+				${search_cate_id} like '%' #{search_val_id} '%'
+			</if>
+		</where>
+	</select>
+	<select id = "getUserListCnt" parameterType = "eney.domain.UserVO" resultType = "java.lang.Integer">
+		 select
+			count(*)
+		from
+			(select * from n_user) A
+			left outer join n_user_info B on A.userid = B.userid
+			left outer join n_user_identification_code D on A.userid = D.userid
+
+		<where>
+			<if test="searchFiled != '' and searchFiled != null">
+				A.${searchFiled} like '%' #{searchValue} '%'
+			</if>
+		</where>
+		order by A.idx
+	</select>
+
+	<select id ="getUserListAll" parameterType="eney.domain.UserVO" resultType="eney.domain.UserVO">
+		SELECT *
+		FROM n_user
+	</select>
+	<select id="getUserList" parameterType="eney.domain.UserVO" resultType="eney.domain.UserVO">
+		select
+			rownum, idx, name, userid, birth_day, password, email, phone_number, account_bank, account_number, member_kind, corporate_number, reg_date, last_login,
+   			type, auth, epoint, iden_code_date, purpose,identification_code
+		from (
+			select a.*,
+				(case @vidx when a.idx then @rownum:=@rownum else @rownum:=@rownum+1 end) rownum,
+		        (@vidx:=a.idx) vjob
+			from (
+				select
+					DISTINCT user.idx, user.name, user.userid, user.birth_day, user.password, user.email, user.phone_number, user.account_bank, user.account_number, user.member_kind, user.corporate_number, user.reg_date, user.last_login,
+		            info.type, info.auth, info.epoint, iden.iden_code_date, info.purpose,iden.identification_code
+				from (select * from n_user
+						<where>
+					 		<if test="searchFiled != '' and searchFiled != null">
+								${searchFiled} like '%' #{searchValue} '%'
+							</if>
+	 					</where>
+	 				  order by last_login desc, idx asc
+				) as user
+	        left outer join n_user_info info on user.userid = info.userid
+	        left outer join n_user_identification_code iden on user.userid = iden.userid) a,
+			(select @vidx:='', @rownum:=0 from dual) b
+			#order by a.job, a.sal
+        )c
+        <where>
+				rownum between #{startRowNo} and #{endRowNo}
+		</where>
+	</select>
+
+	<select id = "getMappedPatchcallAmount" parameterType = "java.lang.Integer" resultType = "java.lang.Integer">
+		SELECT count(*) FROM t_agent_ivr where rcv_no != ' '
+	</select>
+
+	<select id ="getEnablePatchCallSKB" resultType="java.util.Map">
+		SELECT count(*) as 'all',COUNT(if(reg_gubun='A', reg_gubun, null)) AS usenumber ,COUNT(if(reg_gubun='b', reg_gubun, null)) AS nousenumber
+ 		FROM t_vno_ivr;
+	</select>
+
+
+	<select id ="getEnablePatchCallSKBAll" resultType="java.util.Map">
+		SELECT  usenumber + nouse as 'all' , usenumber , nouse as nousenumber from skbusenumber
+	</select>
+
+	<select id ="getEnablePatchCallSeJong" resultType="java.util.Map">
+		SELECT count(*) as 'all',COUNT(if(reg_gubun='A', reg_gubun, null)) AS usenumber ,COUNT(if(reg_gubun='b', reg_gubun, null)) AS nousenumber
+		FROM t_vno_ivr_s;
+	</select>
+
+	<select id ="getRefundCount" parameterType = "java.lang.Integer" resultType = "java.lang.Integer">
+		SELECT count(*) FROM n_refund_log WHERE charge_date BETWEEN DATE_ADD(NOW(),INTERVAL -1 WEEK ) AND NOW();
+	</select>
+
+	<select id="getRefundList" resultType="eney.domain.EpointRefundVO">
+		SELECT * FROM n_refund_log WHERE charge_date BETWEEN DATE_ADD(NOW(),INTERVAL -1 WEEK ) AND NOW();
+	</select>
+
+	<select id="getRefundInfo" parameterType="eney.domain.EpointRefundVO" resultType="eney.domain.EpointRefundVO">
+		SELECT * FROM n_refund_log where refund_id =#{refund_id}
+	</select>
+
+	<update id="updateRefundInfo" parameterType="eney.domain.EpointRefundVO">
+		UPDATE n_refund_log SET
+			status = #{status}
+		WHERE refund_id = #{refund_id};
+	</update>
+
+
+	<select id="getCallCountSummary" resultType="java.util.HashMap">
+		SELECT *
+		FROM (SELECT STR_TO_DATE(date, '%Y%m%d') as date, call_count FROM eney.n_cdr_stat
+			ORDER BY date DESC
+			limit 0, 10) AS callcount
+		ORDER BY date
+	</select>
+
+	<select id="getCallCountAll" resultType="java.lang.Integer">
+		select sum(count) as total from
+			(select count(*) as count from t_cdr_01
+			union all
+			select count(*) as count from t_cdr_02
+			union all
+			select count(*) as count from t_cdr_03
+			union all
+			select count(*) as count from t_cdr_04
+			union all
+			select count(*) as count from t_cdr_05
+			union all
+			select count(*) as count from t_cdr_06
+			union all
+			select count(*) as count from t_cdr_07
+			union all
+			select count(*) as count from t_cdr_08
+			union all
+			select count(*) as count from t_cdr_09
+			union all
+			select count(*) as count from t_cdr_10
+			union all
+			select count(*) as count from t_cdr_11
+			union all
+			select count(*) as count from t_cdr_12
+		) as z
+	</select>
+
+	<select id="getUserInfo" parameterType="eney.domain.UserVO" resultType="eney.domain.UserVO">
+		select * from (select * from n_user where idx = #{idx}) A
+		left outer join n_user_info B on A.userid = B.userid
+	</select>
+
+	<update id="updateUserInfo" parameterType="eney.domain.UserVO">
+		update n_user
+		<set>
+			<if test="member_kind != null">member_kind = #{member_kind},</if>
+			<if test="name != null">name = #{name},</if>
+			<if test="phone_number != null">phone_number = #{phone_number},</if>
+			<if test="email != null">email = #{email}</if>
+		</set>
+		<where>
+			userid = #{userid}
+		</where>
+	</update>
+
+	<update id="updateUserInfoTB" parameterType="eney.domain.UserVO">
+		update n_user_info
+		<set>
+			auth_patch_call = #{auth_patch_call},
+			auth_patch_dash = #{auth_patch_dash},
+			auth_patch_ai = #{auth_patch_ai},
+			auth_patch_cloud = #{auth_patch_cloud},
+		</set>
+		<where>
+			userid = #{userid}
+		</where>
+	</update>
+
+	<insert id="insertHometax" parameterType="eney.domain.UserHometaxVO">
+		insert into n_user_hometax (userid, hometax_issue_date, tax_number, hometax_amount, hometax_vat,invoice_idx)
+		values (#{userid}, SYSDATE(), #{tax_number},#{hometax_amount}, #{hometax_vat},#{invoice_idx})
+	</insert>
+	<select id="getHometaxIdx" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+		select idx from n_user_hometax where invoice_idx = #{invoice_idx}
+	</select>
+	<update id="upDateInvoiceHometaxIdx" parameterType="java.lang.Integer">
+		update n_user_invoice set hometax_idx = #{hometax_idx} where invoice_idx = #{invoice_idx}
+	</update>
+	<select id="getUserEvent" parameterType="eney.domain.UserEventVO" resultType="eney.domain.UserEventVO">
+		select * from n_user_event where userid = #{userid}
+	</select>
+
+	<select id="getBiList" parameterType="eney.domain.ServiceBIVO" resultMap="BiMap">
+		select
+			rownum, idx, userid,username, publish_email, category_idx, service_type,service_period,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date,generate_yn, api_key,
+			file_id,note, refer_id, category, name, extenstion, volume, upload_name
+		from (
+			select a.*,
+				(case @vidx when a.idx then @rownum:=@rownum else @rownum:=@rownum+1 end) rownum,
+		        (@vidx:=a.idx) vjob
+			from (
+				select idx, userid, username, publish_email, category_idx, service_type,service_period,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date,generate_yn, api_key,
+				file_id,note, refer_id, category, name, extenstion, volume, upload_name
+				from (
+					select *
+					from n_service_bi
+					left outer join (select * from n_fileupload where category = 'CORPORATE_BI') as file
+					on n_service_bi.idx = file.refer_id
+					order by idx desc
+				) as user) a,
+			(select @vidx:='', @rownum:=0 from dual) b
+        )c
+	</select>
+	<select id="getWebHostingList" parameterType="eney.domain.ServiceWebHostingVO" resultMap="WebHostingMap">
+		select
+			rownum, web_hosting_idx, userid,username, publish_email, web_domain, web_ip_address,web_ftp_id,web_ftp_pw, web_db_id, web_db_pw, web_storage, service_type,service_period,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date,generate_yn,
+			file_id,note, refer_id, category, name, extenstion, volume, upload_name
+		from (
+			select a.*,
+				(case @vidx when a.web_hosting_idx then @rownum:=@rownum else @rownum:=@rownum+1 end) rownum,
+		        (@vidx:=a.web_hosting_idx) vjob
+			from (
+				select web_hosting_idx, userid,username, publish_email, web_domain, web_ip_address,web_ftp_id,web_ftp_pw, web_db_id, web_db_pw, web_storage, service_type,service_period,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date,generate_yn,
+				file_id,note, refer_id, category, name, extenstion, volume, upload_name
+				from (
+					select *
+					from n_service_web
+					left outer join (select * from n_fileupload where category = 'CORPORATE_WEB') as file
+					on n_service_web.web_hosting_idx = file.refer_id
+					order by web_hosting_idx desc
+				) as user) a,
+			(select @vidx:='', @rownum:=0 from dual) b
+        )c
+	</select>
+	<select id="getPatchcallList" parameterType="eney.domain.ServicePatchcallVO" resultMap="PatchcallMap">
+		select
+			rownum, patchcall_idx, userid,username, publish_email, service_type,service_period,patchcall_purpose,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date,generate_yn,
+			note,file_id, refer_id, category, name, extenstion, volume, upload_name
+		from (
+			select a.*,
+				(case @vidx when a.patchcall_idx then @rownum:=@rownum else @rownum:=@rownum+1 end) rownum,
+		        (@vidx:=a.patchcall_idx) vjob
+			from (
+				select
+					patchcall_idx, userid,username, publish_email, service_type,service_period,patchcall_purpose,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date,generate_yn,
+					note,file_id, refer_id, category, name, extenstion, volume, upload_name
+				from (
+					select *
+					from n_service_patchcall patchcall
+					left outer join(select * from n_fileupload where category = 'CORPORATE_PATCHCALL') as file
+					on patchcall.patchcall_idx = file.refer_id
+					order by patchcall_idx desc
+				) as user) a,
+			(select @vidx:='', @rownum:=0 from dual) b
+        )c
+	</select>
+	<select id="getPatchcallOtherList" parameterType="eney.domain.ServicePatchcallOtherVO" resultMap="OtherMap">
+		select
+			rownum, idx, userid,username, publish_email,  service_type,service_period,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date,generate_yn
+			,note,file_id, refer_id, category, name, extenstion, volume, upload_name
+		from (
+			select a.*,
+				(case @vidx when a.idx then @rownum:=@rownum else @rownum:=@rownum+1 end) rownum,
+		        (@vidx:=a.idx) vjob
+			from (
+				select idx, userid,username, publish_email, service_type,service_period,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date,generate_yn
+				,note,file_id, refer_id, category, name, extenstion, volume, upload_name
+				from (
+					select *
+					from n_service_patchcall_other other
+					left outer join (select * from n_fileupload where category = 'CORPORATE_OTHER') as file
+					on other.idx = file.refer_id
+					order by idx desc
+				) as user) a,
+			(select @vidx:='', @rownum:=0 from dual) b
+        )c
+	</select>
+	<select id="getRecordList" parameterType="eney.domain.RecordVO" resultMap="RecordMap" >
+		select
+			rownum, idx, userid, publish_email, service_type,service_period,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date
+			,note,file_id, refer_id, category, name, extenstion, volume, upload_name
+		from (
+			select a.*,
+				(case @vidx when a.idx then @rownum:=@rownum else @rownum:=@rownum+1 end) rownum,
+		        (@vidx:=a.idx) vjob
+			from (
+				select idx, userid, publish_email, service_type,service_period,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date
+				,note,file_id, refer_id, category, name, extenstion, volume, upload_name
+				from (
+					select *
+					from n_service_record record
+					left outer join (select * from n_fileupload where category = 'CORPORATE_RECORD') as file
+					on record.idx = file.refer_id
+
+					order by idx desc
+				) as user) a,
+			(select @vidx:='', @rownum:=0 from dual) b
+        )c
+	</select>
+	<select id="getCallbackList" parameterType="eney.domain.CallbackSmsVO" resultMap="CallbackMap" >
+		select
+			rownum, idx, userid, publish_email,  service_type,service_period,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date
+			,file_id, refer_id, category, name, extenstion, volume, upload_name
+		from (
+			select a.*,
+				(case @vidx when a.idx then @rownum:=@rownum else @rownum:=@rownum+1 end) rownum,
+		        (@vidx:=a.idx) vjob
+			from (
+				select idx, userid, publish_email, service_type,service_period,pay_way, corporate_address, ceo_name, end_date, pay_state, reg_date
+					,file_id, refer_id, category, name, extenstion, volume, upload_name
+				from (
+					select *
+					from n_service_callback_sms callback
+					left outer join (select * from n_fileupload where category = 'CORPORATE_CALLBACK') as file
+					on callback.idx = file.refer_id
+					order by idx desc
+				) as user) a,
+			(select @vidx:='', @rownum:=0 from dual) b
+        )c
+	</select>
+	<insert id="insertEvent" parameterType="eney.domain.UserEventVO">
+		insert into n_user_event
+		(userid, event_date, event_time, event_charger, event_content)
+		values (#{userid},#{event_date},#{event_time},#{event_charger},#{event_content})
+	</insert>
+	<update id="updateWebHostingGenerate" parameterType="eney.domain.ServiceWebHostingVO">
+		update n_service_web
+		set generate_yn = 'Y'
+		where web_hosting_idx = #{web_hosting_idx}
+	</update>
+	<update id="updatePatchcallGenerate" parameterType="eney.domain.ServicePatchcallVO">
+		update n_service_patchcall
+		set generate_yn = 'Y'
+		where patchcall_idx = #{patchcall_idx}
+	</update>
+	<update id="updateBillingStatus" parameterType="eney.domain.UserInvoiceVO">
+		update n_user_invoice
+		set pay_history = '확인완료'
+		where invoice_idx = #{invoice_idx}
+	</update>
+	<update id="updatePatchcallOtherGenerate" parameterType="eney.domain.ServicePatchcallOtherVO">
+		update n_service_patchcall_other
+		set generate_yn = 'Y'
+		where idx = #{idx}
+	</update>
+
+	<select id="getTotalCallCount" resultType="java.util.HashMap">
+		SELECT call_count,STR_TO_DATE(date, '%Y%m%d') as date FROM callcountview where date >  NOW() - INTERVAL 10 DAY;
+	</select>
+
+	<select id = "getRecordListCnt" parameterType = "java.lang.Integer" resultType = "java.lang.Integer">
+		SELECT COUNT(*) FROM n_service_record
+	</select>
+	<select id = "getPatchcallListCnt" parameterType = "java.lang.Integer" resultType = "java.lang.Integer">
+		SELECT COUNT(*) FROM n_service_patchcall
+	</select>
+	<select id = "getPatchcallOtherListCnt" parameterType = "java.lang.Integer" resultType = "java.lang.Integer">
+		SELECT COUNT(*) FROM n_service_patchcall_other
+	</select>
+	<select id = "getWebHostingListCnt" parameterType = "java.lang.Integer" resultType = "java.lang.Integer">
+		SELECT COUNT(*) FROM n_service_web
+	</select>
+	<select id = "getCallbackListCnt" parameterType = "java.lang.Integer" resultType = "java.lang.Integer">
+		SELECT COUNT(*) FROM n_service_callback_sms
+	</select>
+	<select id="getWebApplicantList" parameterType="eney.domain.ServiceWebHostingVO" resultType="eney.domain.ServiceWebHostingVO">
+		select * from n_service_web where web_hosting_idx = #{web_hosting_idx}
+	</select>
+	<select id="getPatchcallApplicantList" parameterType="eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+		select * from n_service_patchcall where patchcall_idx = #{patchcall_idx}
+	</select>
+	<select id="getOtherApplicantsList" parameterType="eney.domain.ServicePatchcallOtherVO" resultType="eney.domain.ServicePatchcallOtherVO">
+		select * from n_service_patchcall_other where idx = #{idx}
+	</select>
+
+	<select id="getApiMesurement" resultType="java.util.HashMap">
+		SELECT year(log_date) as year, month(log_date) as month, avg(log_elapsed_time/1000) as time
+		FROM n_api_logs
+		where log_category = 'vno' and log_statuscode = 200
+		group by year(log_date), month(log_date)
+		order by log_token_idx desc
+		limit 6
+	</select>
+
+	<select id = "getEndAgentList" parameterType = "eney.domain.AgentVO" resultType = "eney.domain.AgentVO">
+		select
+			rownum, idx, name, vno, rcv_no, dong_name, reg_date, user_id, limit_date, del_date
+		from (
+			select del.*,
+				(case @vidx when del.idx then @rownum:=@rownum else @rownum:=@rownum+1 end) rownum,
+		        (@vidx:=del.idx) vjob
+			from t_agent_del del,
+			(select @vidx:='', @rownum:=0 from dual) b
+			#order by del.job, del.sal
+        )c
+        <where>
+			<if test="pagination_flag != false">
+				rownum between #{present_first_item_idx} and #{present_last_item_idx}
+			</if>
+		</where>
+
+	</select>
+
+	<select id = "getEndAgentListCnt" parameterType = "eney.domain.AgentVO" resultType = "java.lang.Integer">
+		SELECT
+		COUNT(*)
+		FROM
+		t_agent_del
+	</select>
+	<select id='getBillingList' parameterType="eney.domain.UserHometaxVO" resultType="eney.domain.UserHometaxVO">
+		select distinct A.userid ,A.hometax_issue_date,A.tax_number,A.hometax_amount,A.hometax_vat,B.invoice_idx,B.pay_history,B.hometax_idx,B.generate_yn
+         from n_user_hometax A
+        left outer join n_user_invoice B on A.invoice_idx = B.invoice_idx
+        where A.userid = #{userid}
+         group by A.tax_number order by A.hometax_issue_date
+	</select>
+	<select id='getNoHometaxList' parameterType="eney.domain.UserInvoiceVO" resultType="eney.domain.UserInvoiceVO">
+		select * from n_user_invoice where userid =#{userid} AND hometax_idx is null
+	</select>
+
+
+
+	<select id="getColoringListCount" resultType="java.lang.Integer" parameterType="eney.domain.ColoringRegisterVO">
+		select count(*) from n_coloring_register
+	</select>
+	<select id='getColoringList' parameterType="eney.domain.ColoringRegisterVO" resultType="eney.domain.ColoringRegisterVO">
+		SELECT *
+		FROM
+		(
+		SELECT
+		@num:=@num+1 rownum,
+		E.*
+		FROM
+		(SELECT @num:=0) D,
+		(
+		SELECT * FROM n_coloring_register
+		ORDER by write_date DESC
+		) E
+		)Z
+		<where>
+			<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+				Z.rownum between #{startRowNo} and #{endRowNo}
+			</if>
+		</where>
+
+	</select>
+
+	<update id="updateNoteContent" parameterType="eney.domain.ServicePatchcallVO">
+		UPDATE n_service_patchcall SET
+			note = #{note}
+		WHERE patchcall_idx = #{patchcall_idx};
+	</update>
+	<select id="getNoteContent" parameterType="eney.domain.ServicePatchcallVO" resultType="eney.domain.ServicePatchcallVO">
+		select * from n_service_patchcall where patchcall_idx = #{patchcall_idx}
+	</select>
+
+	<select id="getPatchcallDetail" parameterType="eney.domain.ServicePatchcallVO" resultType="java.util.HashMap">
+		select user.userid, user.email, user.name, user.corporate_number, patchcall.patchcall_idx, patchcall.service_type, patchcall.service_amount, patchcall.service_vat, patchcall.number_amount,
+		patchcall.patchcall_purpose, patchcall.service_period, patchcall.pay_way, patchcall.corporate_address, patchcall.ceo_name, patchcall.publish_email, patchcall.end_date, patchcall.reg_date,
+        patchcall.generate_yn, patchcall.status, patchcall.note, file.file_id, file.refer_id, file.name as file_name, file.upload_name, file.extenstion
+		from n_service_patchcall patchcall
+		left outer join(select * from n_fileupload where category = 'CORPORATE_PATCHCALL') as file
+		on patchcall.patchcall_idx = file.refer_id
+        left join n_user user on patchcall.userid = user.userid
+		where patchcall_idx = #{patchcall_idx}
+	</select>
+	<select id="getWebDetail" parameterType="eney.domain.ServiceWebHostingVO" resultType="java.util.HashMap">
+		select user.userid, user.email, user.name, user.corporate_number, web.web_domain, web.web_ip_address, web.web_ftp_id, web.web_ftp_pw, web.web_db_id, web.web_db_pw, web.web_hosting_idx, web.service_type, web.service_amount, web.service_vat,
+		web.service_period, web.pay_way, web.corporate_address, web.ceo_name, web.publish_email, web.end_date, web.reg_date,
+		web.generate_yn, web.status, web.note, file.file_id, file.refer_id, file.name as file_name, file.upload_name, file.extenstion
+		from n_service_web web
+		left outer join(select * from n_fileupload where category = 'CORPORATE_WEB') as file
+		on web.web_hosting_idx = file.refer_id
+		left join n_user user on web.userid = user.userid
+		where web_hosting_idx = #{web_hosting_idx}
+	</select>
+	<select id="getBiDetail" parameterType="eney.domain.ServiceBIVO" resultType="java.util.HashMap">
+		select bi.idx, bi.userid, bi.username, bi.service_type, bi.category_idx, bi.service_period, bi.pay_way, bi.corporate_address, bi.ceo_name, bi.publish_email, bi.end_date, bi.pay_state, bi.reg_date, bi.note
+			,info.account_id, info.tracking_id, info.view_id, info.table_id, info.file_name, file.file_id, file.upload_name, user.email, user.phone_number
+		from n_service_bi bi
+		left join n_bi_info info on bi.idx = info.service_idx
+		left outer join(
+			select * from n_fileupload where category = 'CORPORATE_BI'
+		) as file
+		on bi.idx = file.refer_id
+		left join n_user user on bi.userid = user.userid
+		where bi.idx = #{idx}
+	</select>
+
+
+	<update id="updateWebNoteContent" parameterType="eney.domain.ServiceWebHostingVO">
+		UPDATE n_service_web SET
+		note = #{note}
+		WHERE web_hosting_idx = #{web_hosting_idx};
+	</update>
+
+	<select id="getWebNoteContent" parameterType="eney.domain.ServiceWebHostingVO" resultType="eney.domain.ServiceWebHostingVO">
+		select * from n_service_web where web_hosting_idx = #{web_hosting_idx}
+	</select>
+
+	<select id = "getBIUserListByAdmin" resultType="hashmap">
+		select userid from n_service_bi
+	</select>
+
+	<update id = "updateBi" parameterType="eney.domain.ServiceBIVO">
+		UPDATE n_service_bi
+		SET note = #{note}
+		WHERE idx = #{idx}
+	</update>
+
+	<select id = "getBiNoteContent" parameterType="Integer" resultType="eney.domain.ServiceBIVO">
+		SELECT *
+		FROM n_service_bi
+		WHERE idx = #{idx}
+	</select>
+	<select id = "getBiLink" parameterType="eney.domain.BiInfoVO" resultMap="BiInfoMap">
+		SELECT *
+		FROM n_bi_info info
+		LEFT JOIN (
+			SELECT * FROM n_fileupload where category = 'BI_SERVICE_KEY'
+		) as file
+		ON info.idx = file.refer_id
+		WHERE service_idx = #{service_idx}
+	</select>
+
+	<insert id = "createCouponNum" parameterType="java.util.List">
+		INSERT into coupon (coupon_num, point, create_date, used)
+		VALUES
+		<foreach collection="list" item="item" separator=" , " >
+			("${item.coupon_num}", "${item.point}", SYSDATE(), false)
+		</foreach>
+	</insert>
+
+
+	<select id="getCouponList" parameterType="eney.domain.CouponVO" resultType="eney.domain.CouponVO">
+		select*
+		from(
+			select
+			@num:=@num+1 rownum,
+			E.*
+			from
+			(SELECT @num:=0) D,
+				(select
+					*
+				from coupon
+				order by idx desc
+				) E
+		) Z
+		<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+			where Z.rownum between #{startRowNo} and #{endRowNo}
+		</if>
+
+	</select>
+
+	<select id="getCouponListCnt" parameterType="eney.domain.CouponVO" resultType="java.lang.Integer">
+		select
+		count(*)
+		from
+		(
+		select
+		@num:=@num+1 rownum,
+		E.*
+		from
+		(SELECT @num:=0) D,
+		(select
+		*
+		from coupon
+		) E
+		) Z
+	</select>
+
+	<select id="getCustomUserCount" resultType="eney.domain.CustomUserCount">
+		select
+		 web_log, personal, corp, api, visit
+		from custom_user_count
+		where idx = 1
+	</select>
+
+	<update id="updateCustomUserCount" parameterType="eney.domain.CustomUserCount" >
+		UPDATE custom_user_count SET
+			web_log = #{web_log},
+			personal = #{personal},
+			corp = #{corp}
+	</update>
+
+	<select id="getPatchCallApplyListCount" resultType="java.lang.Integer" parameterType="eney.domain.ServiceApplyVO">
+		select count(*) from n_service_patchcall
+	</select>
+	<select id='getPatchCallApplyList' parameterType="eney.domain.ServiceApplyVO" resultType="eney.domain.ServiceApplyVO">
+		SELECT *
+		FROM
+		(
+		SELECT
+		@num:=@num+1 rownum,
+		E.*
+		FROM
+		(SELECT @num:=0) D,
+		(
+		SELECT * FROM n_service_patchcall
+		ORDER by reg_date DESC
+		) E
+		)Z
+		<where>
+			<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+				Z.rownum between #{startRowNo} and #{endRowNo}
+			</if>
+		</where>
+
+	</select>
+
+	<select id="getPatchIntelligenceApplyListCount" resultType="java.lang.Integer" parameterType="eney.domain.ServiceApplyVO">
+		select count(*) from n_service_patch_intelligence
+	</select>
+	<select id='getPatchIntelligenceApplyList' parameterType="eney.domain.ServiceApplyVO" resultType="eney.domain.ServiceApplyVO">
+		SELECT *
+		FROM
+		(
+		SELECT
+		@num:=@num+1 rownum,
+		E.*
+		FROM
+		(SELECT @num:=0) D,
+		(
+		SELECT * FROM n_service_patch_intelligence
+		ORDER by reg_date DESC
+		) E
+		)Z
+		<where>
+			<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+				Z.rownum between #{startRowNo} and #{endRowNo}
+			</if>
+		</where>
+
+	</select>
+
+	<select id="getThirdPartApplyListCount" resultType="java.lang.Integer" parameterType="eney.domain.ServiceApplyVO">
+		select count(*) from n_service_3rdpart
+	</select>
+	<select id='getThirdPartApplyList' parameterType="eney.domain.ServiceApplyVO" resultType="eney.domain.ServiceApplyVO">
+		SELECT *
+		FROM
+		(
+		SELECT
+		@num:=@num+1 rownum,
+		E.*
+		FROM
+		(SELECT @num:=0) D,
+		(
+		SELECT * FROM n_service_3rdpart
+		ORDER by reg_date DESC
+		) E
+		)Z
+		<where>
+			<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+				Z.rownum between #{startRowNo} and #{endRowNo}
+			</if>
+		</where>
+
+	</select>
+
+	<update id="updateThirdPartApply" parameterType="eney.domain.ServiceApplyVO">
+		update n_service_3rdpart
+		<set>
+			<if test="pay_state != null">pay_state = #{pay_state},</if>
+			<if test="status != null">status = #{status},</if>
+		</set>
+		<where>
+			idx = #{idx}
+		</where>
+	</update>
+
+	<update id="updatePatchIntelligenceApply" parameterType="eney.domain.ServiceApplyVO">
+		update n_service_intelligence
+		<set>
+			<if test="pay_state != null">pay_state = #{pay_state},</if>
+			<if test="status != null">status = #{status},</if>
+		</set>
+		<where>
+			idx = #{idx}
+		</where>
+	</update>
+
+	<update id="updatePatchCallApply" parameterType="eney.domain.ServiceApplyVO">
+		update n_service_patchcall
+		<set>
+			<if test="pay_state != null">pay_state = #{pay_state},</if>
+			<if test="status != null">status = #{status},</if>
+		</set>
+		<where>
+			patchcall_idx = #{idx}
+		</where>
+	</update>
+
+
+
+
+</mapper>

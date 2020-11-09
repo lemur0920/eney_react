@@ -1,0 +1,1717 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="service">
+
+    <resultMap id="coloringUploadMap" type="eney.domain.ColoringUploadVO">
+        <id property="id" column="id"/>
+        <result property="file_name" column="file_name"/>
+        <result property="description" column="description"/>
+        <result property="userid" column="userid"/>
+        <result property="upload_date" column="upload_date"/>
+        <result property="idx" column="idx"/>
+        <collection property="fileVO_list" ofType="eney.domain.FileVO">
+            <id property="file_id" column="file_id"/>
+            <result property="refer_id" column="refer_id"/>
+            <result property="category" column="category"/>
+            <result property="name" column="name"/>
+            <result property="upload_name" column="upload_name"/>
+            <result property="extenstion" column="extenstion"/>
+            <result property="volume" column="volume"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="coloringRegisterMap" type="eney.domain.ColoringRegisterVO">
+        <id property="id" column="id"/>
+        <result property="userid" column="userid"/>
+        <result property="script" column="script"/>
+        <result property="voice_tone" column="voice_tone"/>
+        <result property="bgm" column="bgm"/>
+        <result property="write_date" column="write_date"/>
+        <result property="status" column="status"/>
+        <collection property="fileVO_list" ofType="eney.domain.FileVO">
+            <id property="file_id" column="file_id"/>
+            <result property="refer_id" column="refer_id"/>
+            <result property="category" column="category"/>
+            <result property="name" column="name"/>
+            <result property="upload_name" column="upload_name"/>
+            <result property="extenstion" column="extenstion"/>
+            <result property="volume" column="volume"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="agentAddressMap" type="eney.domain.AgentAddressVO">
+        <result property="address" column="address"/>
+        <result property="roadAddress" column="road_address"/>
+        <result property="jibunAddress" column="jibun_address"/>
+        <result property="buildingName" column="building_name"/>
+        <result property="sido" column="sido"/>
+        <result property="sigungu" column="sigungu"/>
+        <result property="roadname" column="roadname"/>
+        <result property="bname" column="bname"/>
+        <result property="bname1" column="bname1"/>
+        <result property="zonecode" column="zonecode"/>
+        <result property="detailAddress" column="detail_address"/>
+    </resultMap>
+
+    <select id="getSampleList" parameterType="eney.domain.ColoringSampleVO" resultType="eney.domain.ColoringSampleVO">
+        select * from n_coloring_sample
+        where
+        <if test="gubun != null and gubun != ''">
+            gubun = #{gubun}
+        </if>
+        <if test="category != null and category != ''">
+            category = #{category}
+        </if>
+    </select>
+
+    <insert id="submitColoringRegister" parameterType="eney.domain.ColoringRegisterVO">
+		INSERT INTO n_coloring_register 
+			(
+			 userid,
+			 script,
+			 voice_tone,
+			 bgm,
+			 write_date,
+			 status
+			)
+		VALUES
+			(
+			#{userid},
+			#{script},
+			#{voice_tone},
+			#{bgm},
+			now(),
+			'waiting'
+			
+			)
+	</insert>
+
+    <insert id="submitColoringUpload" parameterType="eney.domain.ColoringUploadVO">
+        INSERT INTO n_coloring_upload
+        (
+        regid,
+        file_name,
+        description,
+        userid,
+        targetid,
+        upload_date,
+        type,
+        ivr
+        )
+        VALUES
+        (
+        #{id},
+        #{file_name},
+        #{description},
+        #{userid},
+        #{targetid},
+        sysdate(),
+        #{type},
+        #{ivr}
+        )
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <select id="getUploadListCnt" parameterType="eney.domain.ColoringUploadVO" resultType="java.lang.Integer">
+		select 
+			count(*) 
+		from 
+			(
+			select 
+				@num:=@num+1 rownum,
+				E.*
+			from
+				(SELECT @num:=0) D,
+		 (select 
+		 			idx,
+					id,
+					userid,
+					C.file_name,
+					description,
+					upload_date,
+					file_id,
+					name,
+					upload_name,
+					category,
+					volume,
+					extenstion
+				from 
+					(SELECT
+			    	idx,
+			    	name gubun,
+			    	file_name,
+			    	reg_date,
+			    	login_id 
+		           FROM t_colorring_ivr
+		           where remark != 'deleted'
+		           and login_id = #{userid}
+		            ) AS A 
+			    INNER JOIN n_fileupload AS B 
+			    ON A.file_name = B.upload_name
+			    INNER JOIN n_coloring_upload AS C
+			    ON B.refer_id = C.id 
+			   	where userid=#{userid}
+			   	order by id desc
+			    ) E
+					  ) Z
+	</select>
+
+    <select id="getUploadList" parameterType="eney.domain.ColoringUploadVO" resultMap="coloringUploadMap">
+        select
+        *
+        from
+        (
+        select
+        @num:=@num+1 rownum,
+        E.*
+        from
+        (SELECT @num:=0) D,
+        (select
+        idx,
+        id,
+        userid,
+        C.file_name,
+        description,
+        upload_date,
+        file_id,
+        name,
+        upload_name,
+        category,
+        volume,
+        extenstion
+        from
+        (SELECT
+        idx,
+        name gubun,
+        file_name,
+        reg_date,
+        login_id
+        FROM coloring
+        where remark != 'deleted'
+        and login_id = #{userid}
+        ) AS A
+        INNER JOIN n_fileupload AS B
+        ON A.file_name = B.upload_name
+        INNER JOIN n_coloring_upload AS C
+        ON B.refer_id = C.id
+        order by id desc
+        ) E
+        ) Z
+        <where>
+            <if test="present_page != null and present_page !=-1 and present_page != ''">
+                Z.rownum between #{present_first_item_idx} and #{present_last_item_idx}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="getRcvmentList" parameterType="eney.domain.ColoringUploadVO" resultMap="coloringUploadMap">
+        select
+        *
+        from
+        (
+        select
+        @num:=@num+1 rownum,
+        E.*
+        from
+        (SELECT @num:=0) D,
+        (select
+        idx,
+        id,
+        userid,
+        C.file_name,
+        description,
+        upload_date,
+        file_id,
+        name,
+        upload_name,
+        category,
+        volume,
+        extenstion
+        from
+        (SELECT
+        idx,
+        name gubun,
+        file_name,
+        reg_date,
+        login_id
+        FROM rcvment
+        where remark != 'deleted'
+        and login_id = #{userid}
+        ) AS A
+        INNER JOIN n_fileupload AS B
+        ON A.file_name = B.upload_name
+        INNER JOIN n_coloring_upload AS C
+        ON B.refer_id = C.id
+        order by id desc
+        ) E
+        ) Z
+        <where>
+            <if test="present_page != null and present_page !=-1 and present_page != ''">
+                Z.rownum between #{present_first_item_idx} and #{present_last_item_idx}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="getColoringUploadVO" parameterType="eney.domain.ColoringUploadVO"
+            resultType="eney.domain.ColoringUploadVO">
+		select 
+			* 
+		from 
+			(
+			select 
+				@num:=@num+1 rownum,
+				E.*
+			from
+				(SELECT @num:=0) D,
+		 (select 
+		 			idx,
+					id,
+					userid,
+					targetid,
+					C.file_name,
+					description,
+					upload_date,
+					file_id,
+					name,
+					upload_name,
+					category,
+					volume,
+					extenstion
+				from 
+					(SELECT
+			    	idx,
+			    	name gubun,
+			    	file_name,
+			    	reg_date,
+			    	login_id 
+		           FROM t_colorring_ivr
+		           where remark != 'deleted'
+		           and login_id = #{userid}
+		            ) AS A 
+			    INNER JOIN n_fileupload AS B 
+			    ON A.file_name = B.upload_name
+			    INNER JOIN n_coloring_upload AS C
+			    ON B.refer_id = C.id 
+			   	order by id desc
+			    ) E
+					  ) Z
+		 where
+		 	(
+				(Z.userid = #{userid} and Z.targetid is not NULL) 
+				or (Z.userid is not NULL and Z.targetid = #{userid})
+			) 
+            and Z.idx = #{idx}
+	</select>
+
+    <select id="getColoringRegisterVOList" parameterType="eney.domain.ColoringRegisterVO"
+            resultMap="coloringRegisterMap">
+        select X.*, Y.* from
+        (select
+        A.*,
+        C.id as upload_id
+        from n_coloring_register A
+        left outer join n_coloring_upload C on A.id = C.regid ) as X
+        left outer join
+        n_fileupload Y on X.upload_id = Y.refer_id
+        <where>
+            status in
+            <foreach collection="status_list" item="item" index="index" separator="," open="(" close=")">
+                #{item.value}
+            </foreach>
+        </where>
+        order by write_date desc
+    </select>
+
+    <update id="updateColoringRegisterVO" parameterType="eney.domain.ColoringRegisterVO">
+		UPDATE n_coloring_register SET
+			status = #{status}
+		WHERE id = #{id}	
+	</update>
+
+    <delete id="coloringUploadDelete" parameterType="eney.domain.ColoringUploadVO">
+        update t_colorring_ivr set
+        remark = 'deleted'
+        <where>
+            idx in
+            <foreach collection="id_array" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+    </delete>
+
+    <!-- delete수정 다시.. -->
+    <delete id="rcvmentUploadDelete" parameterType="eney.domain.ColoringUploadVO">
+        update t_rcvment_ivr set
+        remark = 'deleted'
+        <where>
+            idx in
+            <foreach collection="id_array" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+    </delete>
+
+    <!-- 공통 코드 -->
+    <sql id="commonSelectItem_fragment">
+        <if test="category != null and category != ''">
+            category = #{category}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            keyword = #{keyword}
+        </if>
+    </sql>
+
+    <select id="getCommonList" parameterType="eney.domain.CommonVO" resultType="eney.domain.CommonVO">
+        SELECT *
+        FROM n_common
+        <where>
+            <include refid="commonSelectItem_fragment"/>
+        </where>
+    </select>
+
+    <update id="updateCommon" parameterType="eney.domain.CommonVO">
+        UPDATE n_common
+        <set>
+            <if test="name != null and value != ''">
+                value = #{value}s
+            </if>
+        </set>
+        <where>
+            <if test="common_id != null and common_id != ''">
+                common_id = #{common_id}
+            </if>
+            <if test="common_id == null or common_id == ''">
+                category = #{category}
+                keyword = #{keyword}
+            </if>
+        </where>
+    </update>
+
+    <delete id="deleteCommon" parameterType="eney.domain.CommonVO">
+        DELETE
+        FROM n_common
+        WHERE
+        <include refid="commonSelectItem_fragment"/>
+    </delete>
+
+
+    <select id="getColoringListAll" parameterType="eney.domain.ColoringUploadVO" resultType="java.util.Map">
+		SELECT * 
+        FROM 
+           (select * from
+           t_colorring_ivr
+           where login_id=#{userid}
+           and remark != 'deleted')
+            AS A 
+	    INNER JOIN n_fileupload AS B 
+	    ON A.file_name = B.upload_name
+	    INNER JOIN n_coloring_upload AS C
+	    ON B.refer_id = C.id
+	    order by reg_date desc	 
+	</select>
+
+    <select id="getRcvmentListAll" parameterType="eney.domain.ColoringUploadVO" resultType="java.util.Map">
+		SELECT * 
+        FROM 
+           (select * from
+           t_rcvment_ivr
+           where login_id=#{userid}
+           and remark != 'deleted')
+            AS A 
+	    INNER JOIN n_fileupload AS B 
+	    ON A.file_name = B.upload_name
+	    INNER JOIN n_coloring_upload AS C
+	    ON B.refer_id = C.id
+	    order by reg_date desc	 
+	</select>
+
+    <select id="getVnoVO" parameterType="eney.domain.VnoVO" resultType="eney.domain.VnoVO">
+		SELECT * FROM t_vno_ivr where vno = #{vno} and reg_gubun = 'B'
+	</select>
+    <select id="getVnoVO22" parameterType="eney.domain.VnoVO" resultType="eney.domain.VnoVO">
+		SELECT vno, reg_gubun 
+		FROM t_vno_ivr_s
+		WHERE vno = #{vno} and reg_gubun = 'B'
+	</select>
+
+    <select id="getRecommendNumList" parameterType="eney.domain.VnoVO" resultType="eney.domain.VnoVO">
+		select * from t_vno_ivr where reg_gubun = 'B' and vno like #{vno} limit 3
+	</select>
+    <select id="getRecommendNumList22" parameterType="eney.domain.VnoVO" resultType="eney.domain.VnoVO">
+		select * from t_vno_ivr_s where reg_gubun = 'B' and vno like #{vno} limit 3
+	</select>
+    <insert id="submit050Register" parameterType="eney.domain.AgentVO">
+        insert into t_agent_ivr
+        (
+        name,
+        vno,
+        rcv_no,
+        dong_name,
+        dong_yn,
+        colorring_idx,
+        rcvment_idx,
+        sendment_idx,
+        sms,
+        sms_yn,
+        out_sms,
+        out_sms_yn,
+        login_id,
+        user_id,
+        limit_date
+        )
+        values
+        (
+        #{name},
+        #{vno},
+        #{rcv_no},
+        #{dong_name},
+        #{dong_yn},
+        #{colorring_idx},
+        #{rcvment_idx},
+        #{sendment_idx},
+        <if test='sms_yn == "Y"'>
+            #{sms},
+        </if>
+        <if test='sms_yn != "Y"'>
+            NULL,
+        </if>
+        #{sms_yn},
+        <if test='out_sms_yn == "Y"'>
+            #{out_sms},
+        </if>
+        <if test='out_sms_yn != "Y"'>
+            NULL,
+        </if>
+        #{out_sms_yn},
+        #{login_id},
+        #{user_id},
+        (select date_add(now(), interval +1 month) from dual)
+        )
+    </insert>
+    <insert id="submit050Register22" parameterType="eney.domain.AgentVO">
+        insert into t_agent_ivr_s
+        (
+        name,
+        vno,
+        rcv_no,
+        dong_name,
+        dong_yn,
+        colorring_idx,
+        rcvment_idx,
+        sendment_idx,
+        sms,
+        sms_yn,
+        out_sms,
+        out_sms_yn,
+        login_id,
+        user_id,
+        limit_date,
+        callback_no,
+        out_sms_phone,
+        mms_file
+        )
+        values
+        (
+        #{name},
+        #{vno},
+        #{rcv_no},
+        #{dong_name},
+        #{dong_yn},
+        #{colorring_idx},
+        #{rcvment_idx},
+        #{sendment_idx},
+        <if test='sms_yn == "Y"'>
+            #{sms},
+        </if>
+        <if test='sms_yn == "M"'>
+            #{sms},
+        </if>
+        <if test='sms_yn == "N"'>
+            NULL,
+        </if>
+        #{sms_yn},
+        <if test='out_sms_yn == "Y"'>
+            #{out_sms},
+        </if>
+        <if test='out_sms_yn != "Y"'>
+            NULL,
+        </if>
+        #{out_sms_yn},
+        #{login_id},
+        #{user_id},
+        (select date_add(now(), interval +1 month) from dual),
+        #{callback_no},
+        #{out_sms_phone},
+        #{mms_file}
+
+        )
+    </insert>
+    <update id="update050VnoVO" parameterType="eney.domain.AgentVO">
+		UPDATE t_vno_ivr SET
+			reg_gubun = #{reg_gubun}
+		where
+			vno = #{vno}
+	</update>
+    <update id="update050VnoVO22" parameterType="eney.domain.AgentVO">
+		UPDATE t_vno_ivr_s SET
+			reg_gubun = #{reg_gubun}
+		where
+			vno = #{vno}
+	</update>
+    <select id="getAgentVOListCnt" parameterType="eney.domain.AgentVO" resultType="java.lang.Integer">
+		select count(*) 
+		from getAgent
+		<![CDATA[	
+  	  	where user_id = #{user_id} and limit_date > now()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ]]>
+    </select>
+
+    <select id="getAgentListCnt" parameterType="eney.domain.AgentVO" resultType="java.lang.Integer">
+        select count(*)
+        from getAgent
+        where user_id = #{user_id}
+        <if test="searchFiled != null and searchFiled != '' and searchValue != null and searchValue != ''">
+            and ${searchFiled} like '%' #{searchValue} '%'
+        </if>
+    </select>
+
+
+    <select id="getAgentVOListUnion" parameterType="eney.domain.AgentVO" resultType="eney.domain.AgentVO">
+		select
+			ivr.idx,
+			ivr.name,
+			ivr.vno,
+			ivr.rcv_no,
+			ivr.dong_name,
+			ivr.dong_yn,
+			ivr.colorring_idx,
+			ivr.rcvment_idx,
+			ivr.sendment_idx,
+			ivr.sms,
+			ivr.sms_yn,
+			ivr.out_sms,
+			ivr.out_sms_yn,
+			ivr.login_id,
+			ivr.reg_date,
+			ivr.user_id,
+			ivr.limit_date,
+			(
+				SELECT count(link_url) 
+				FROM n_link_info info
+				WHERE info.link_url = concat('tel:', ivr.vno)
+					AND info.link_type = 3
+                    AND info.link_delete = false
+			) as make_click_to_call		
+		from getAgent as ivr
+		where
+			ivr.user_id = #{user_id}		
+	</select>
+
+
+    <select id="getAgentVOListAll" parameterType="eney.domain.AgentVO" resultType="java.util.LinkedHashMap">
+        SELECT
+        vno,
+        rcv_no,
+        name,
+        dong_name,
+        dong_yn,
+        sms,
+        sms_yn,
+        out_sms,
+        out_sms_yn,
+        date_format(reg_date,'%Y-%m-%d') as reg_date,
+        date_format(limit_date,'%Y-%m-%d') as limit_date
+        FROM getAgent
+        WHERE
+        user_id = #{user_id}
+        <if test="name != null and name != ''">
+            and name like '%' #{name} '%'
+        </if>
+        <if test="dong_name != null and dong_name != ''">
+            and dong_name like '%' #{dong_name} '%'
+        </if>
+        <if test="vno != null and vno != ''">
+            and vno = #{vno}
+        </if>
+        <if test="rcv_no != null and rcv_no != ''">
+            and rcv_no = #{rcv_no}
+        </if>
+    </select>
+
+    <select id="getAgentVOListForService" parameterType="eney.domain.AgentVO" resultType="eney.domain.AgentVO">
+        SELECT *
+        FROM (
+        SELECT @num := @num+1 rownum, E.*
+        FROM (SELECT @num:=0) D,
+        ( select
+        ivr.idx,
+        ivr.name,
+        ivr.vno,
+        ivr.rcv_no,
+        ivr.dong_name,
+        ivr.dong_yn,
+        ivr.colorring_idx,
+        ivr.rcvment_idx,
+        ivr.sendment_idx,
+        ivr.sms,
+        ivr.sms_yn,
+        ivr.out_sms,
+        ivr.out_sms_yn,
+        ivr.login_id,
+        ivr.reg_date,
+        ivr.user_id,
+        ivr.limit_date,
+        (
+        SELECT count(link_url)
+        FROM n_link_info info
+        WHERE info.link_url = concat('tel:', ivr.vno)
+        AND info.link_type = 3
+        AND info.link_delete = false
+        ) as make_click_to_call
+        from getAgent as ivr
+        where
+        ivr.user_id = #{user_id}
+        <if test="searchFiled != null and searchFiled != '' and searchValue != null and searchValue != ''">
+            and ivr.${searchFiled} like '%' #{searchValue} '%'
+        </if>
+        <!--				<if test="name != null and name != ''">-->
+        <!--					and name like '%' #{name} '%'-->
+        <!--					and dong_name like '%' #{dong_name} '%'-->
+        <!--				</if>-->
+        <!--				<if test="dong_name != null and dong_name != ''">-->
+        <!--					and dong_name like '%' #{dong_name} '%'-->
+        <!--				</if>-->
+        <!--				<if test="vno != null and vno != ''">-->
+        <!--					and vno = #{vno}-->
+        <!--				</if>-->
+        <!--				<if test="rcv_no != null and rcv_no != ''">-->
+        <!--					and rcv_no = #{rcv_no}-->
+        <!--				</if>-->
+        ) E
+        ) Z
+        <where>
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                Z.rownum between #{startRowNo} and #{endRowNo}
+            </if>
+        </where>
+    </select>
+
+    <select id="getAgentVOList" parameterType="eney.domain.AgentVO" resultType="eney.domain.AgentVO">
+        select
+        ivr.idx,
+        ivr.name,
+        ivr.vno,
+        ivr.rcv_no,
+        ivr.dong_name,
+        ivr.dong_yn,
+        ivr.colorring_idx,
+        ivr.rcvment_idx,
+        ivr.sendment_idx,
+        ivr.sms,
+        ivr.sms_yn,
+        ivr.out_sms,
+        ivr.out_sms_yn,
+        ivr.login_id,
+        ivr.reg_date,
+        ivr.user_id,
+        ivr.limit_date,
+        (
+        SELECT count(link_url)
+        FROM n_link_info info
+        WHERE info.link_url = concat('tel:', ivr.vno)
+        AND info.link_type = 3
+        AND info.link_delete = false
+        ) as make_click_to_call
+        from getAgent as ivr
+        where
+        ivr.user_id = #{user_id}
+        <if test="name != null and name != ''">
+            and name like '%' #{name} '%'
+        </if>
+        <if test="dong_name != null and dong_name != ''">
+            and dong_name like '%' #{dong_name} '%'
+        </if>
+        <if test="vno != null and vno != ''">
+            and vno = #{vno}
+        </if>
+        <if test="rcv_no != null and rcv_no != ''">
+            and rcv_no = #{rcv_no}
+        </if>
+    </select>
+
+    <select id="getAgentCnt" parameterType="eney.domain.AgentVO" resultType="java.lang.Integer">
+        select
+        count(*)
+        from
+        getagent
+        <![CDATA[
+		 where user_id = #{user_id} and limit_date > now()
+		 ]]>
+        <if test="search_cate != null and search_cate != ''">
+            and
+            <if test="search_cate == 'dong_name'">
+                dong_name like '%' #{search_text} '%'
+            </if>
+            <if test="search_cate == 'vno'">
+                vno = #{search_text}
+            </if>
+            <if test="search_cate == 'rcv_no'">
+                rcv_no = #{search_text}
+            </if>
+        </if>
+    </select>
+    <select id="getAgentVO" parameterType="eney.domain.AgentVO" resultType="eney.domain.AgentVO">
+        select
+        ivr.idx,
+        ivr.name,
+        ivr.vno,
+        ivr.rcv_no,
+        ivr.dong_name,
+        ivr.dong_yn,
+        ivr.colorring_idx,
+        ivr.rcvment_idx,
+        ivr.sendment_idx,
+        ivr.sms,
+        ivr.sms_yn,
+        ivr.out_sms,
+        ivr.out_sms_yn,
+        ivr.login_id,
+        ivr.reg_date,
+        ivr.user_id,
+        ivr.limit_date,
+        (
+        SELECT count(link_url)
+        FROM n_link_info info
+        WHERE info.link_url = concat('tel:', ivr.vno)
+        AND info.link_type = 3
+        AND info.link_delete = false
+        ) as make_click_to_call
+        from t_agent_ivr as ivr
+        where
+        <if test="idx != null and idx != ''">
+            ivr.idx = #{idx}
+        </if>
+        <if test="idx == null or idx == ''">
+            ivr.vno = #{vno}
+        </if>
+        and ivr.user_id = #{user_id}
+    </select>
+
+    <select id="getAgentVO22" parameterType="eney.domain.AgentVO" resultType="eney.domain.AgentVO">
+        select
+        ivr.idx,
+        ivr.name,
+        ivr.vno,
+        ivr.rcv_no,
+        ivr.dong_name,
+        ivr.dong_yn,
+        ivr.colorring_idx,
+        ivr.rcvment_idx,
+        ivr.sendment_idx,
+        ivr.sms,
+        ivr.sms_yn,
+        ivr.out_sms,
+        ivr.out_sms_yn,
+        ivr.login_id,
+        ivr.reg_date,
+        ivr.user_id,
+        ivr.limit_date,
+        (
+        SELECT count(link_url)
+        FROM n_link_info info
+        WHERE info.link_url = concat('tel:', ivr.vno)
+        AND info.link_type = 3
+        AND info.link_delete = false
+        ) as make_click_to_call,
+        ivr.callback_no,
+        ivr.out_sms_phone,
+        ivr.mms_file
+        from t_agent_ivr_s as ivr
+        where
+        <if test="idx != null and idx != ''">
+            ivr.idx = #{idx}
+        </if>
+        <if test="idx == null or idx == ''">
+            ivr.vno = #{vno}
+        </if>
+        and ivr.user_id = #{user_id}
+    </select>
+
+    <update id="update050Agent" parameterType="eney.domain.AgentVO">
+        UPDATE t_agent_ivr
+        <set>
+            rcv_no = #{rcv_no},
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="dong_name != null">
+                dong_name = #{dong_name},
+            </if>
+            <if test="dong_yn != null and dong_yn != ''">
+                dong_yn = #{dong_yn},
+            </if>
+            <if test="colorring_idx != null">
+                colorring_idx = #{colorring_idx},
+            </if>
+            <if test="rcvment_idx != null">
+                rcvment_idx = #{rcvment_idx},
+            </if>
+            <if test="sms_yn != null and sms_yn != ''">
+                sms_yn = #{sms_yn},
+                <if test='sms_yn == "Y"'>
+                    sms = #{sms},
+                </if>
+                <if test='sms_yn != "Y" || sms_yn != "M"'>
+                    sms = NULL,
+                </if>
+            </if>
+            <if test="out_sms_yn != null and out_sms_yn != ''">
+                out_sms_yn = #{out_sms_yn},
+                <if test='out_sms_yn == "Y"'>
+                    out_sms = #{out_sms}
+                </if>
+                <if test='out_sms_yn != "Y"'>
+                    out_sms = NULL
+                </if>
+            </if>
+        </set>
+        where
+        idx = #{idx}
+    </update>
+
+    <select id="getPaymentList" parameterType="eney.domain.PaymentVO" resultType="eney.domain.PaymentVO">
+		select
+			*
+		from n_item
+		where 
+			category like #{category} '%'
+			order by service_id
+	</select>
+
+    <select id="getPaymentListWithCate" parameterType="eney.domain.PaymentVO" resultType="eney.domain.PaymentVO">
+		select
+			*
+		from n_item
+		where
+			category = #{category}
+		order by service_id
+	</select>
+
+    <select id="getVnoVoByAgent" parameterType="eney.domain.AgentVO" resultType="eney.domain.VnoVO">
+		select
+			*
+		from
+			t_vno_ivr
+		where 
+			vno = #{vno}
+	</select>
+    <select id="getVnoVoByAgent22" parameterType="eney.domain.AgentVO" resultType="eney.domain.VnoVO">
+		select
+			*
+		from
+			t_vno_ivr_s
+		where 
+			vno = #{vno}
+	</select>
+    <select id="getAgent" parameterType="eney.domain.AgentVO" resultType="eney.domain.AgentVO">
+		select
+			*
+		from
+			t_agent_ivr
+		where 
+			user_id = #{user_id}
+	</select>
+    <select id="getAgent22" parameterType="eney.domain.AgentVO" resultType="eney.domain.AgentVO">
+		select
+			ivr.idx,
+			ivr.name,
+			ivr.vno,
+			ivr.rcv_no,
+			ivr.dong_name,
+			ivr.dong_yn,
+			ivr.colorring_idx,
+			ivr.rcvment_idx,
+			ivr.sendment_idx,
+			ivr.sms,
+			ivr.sms_yn,
+			ivr.out_sms,
+			ivr.out_sms_yn,
+			ivr.login_id,
+			ivr.reg_date,
+			ivr.user_id,
+			ivr.limit_date,
+			(
+				SELECT count(link_url) 
+				FROM n_link_info info
+				WHERE info.link_url = concat('tel:', ivr.vno)
+					AND info.link_type = 3
+                    AND info.link_delete = false
+			) as make_click_to_call		
+		from t_agent_ivr_s as ivr
+		where
+			ivr.user_id = #{user_id}
+	</select>
+    <update id="update050VnoForCancel" parameterType="eney.domain.AgentVO">
+        UPDATE t_vno_ivr SET
+        reg_gubun = #{reg_gubun}
+        <where>
+            vno in
+            <foreach collection="close_vno" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+    </update>
+    <update id="update050VnoForCancel22" parameterType="eney.domain.AgentVO">
+        UPDATE t_vno_ivr_s SET
+        reg_gubun = #{reg_gubun}
+        <where>
+            vno in
+            <foreach collection="close_vno" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+    </update>
+
+    <update id="update050VnoForCancelByVno" parameterType="eney.domain.AgentVO">
+		UPDATE t_vno_ivr 
+		SET reg_gubun = #{reg_gubun}
+	    WHERE vno = #{vno}
+	</update>
+
+    <update id="update050VnoForCancelByVno22" parameterType="eney.domain.AgentVO">
+		UPDATE t_vno_ivr_s
+		SET reg_gubun = #{reg_gubun}
+	    WHERE vno = #{vno}
+	</update>
+
+    <delete id="deleteAgent" parameterType="eney.domain.AgentVO">
+        delete from t_agent_ivr
+        <where>
+            vno in
+            <foreach collection="close_vno" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+    </delete>
+
+    <delete id="deleteAgent22" parameterType="eney.domain.AgentVO">
+        delete from t_agent_ivr_s
+        <where>
+            vno in
+            <foreach collection="close_vno" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+    </delete>
+
+    <delete id="deleteAgentByVno" parameterType="eney.domain.AgentVO">
+		DELETE FROM t_agent_ivr
+	    WHERE vno = #{vno}
+	</delete>
+
+    <delete id="deleteAgentByVno22" parameterType="eney.domain.AgentVO">
+		DELETE FROM t_agent_ivr_s
+		WHERE vno = #{vno}
+	</delete>
+
+    <delete id="deleteAgentDelByVno" parameterType="eney.domain.AgentVO">
+		DELETE FROM t_agent_del
+	    WHERE vno = #{vno}
+	</delete>
+
+    <select id="getExpiredAgentList" resultType="eney.domain.AgentVO">
+		<![CDATA[
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                select * from getAgent where limit_date < now()
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ]]>
+	</select>
+
+    <insert id="writeRefundLog" parameterType="eney.domain.EpointRefundVO">
+		insert into n_refund_log(
+			userid,
+			serial_number,
+			epoint_present,
+			epoint_to_refund,
+			amount_to_refund,
+			epoint_balance,
+			which_bank,account_holder,
+			account_number,
+			phone_number)
+		values (
+			#{userid},
+			(concat('RE',(SELECT LPAD((SELECT AUTO_INCREMENT FROM information_schema.TABLES where TABLE_SCHEMA = 'market' and TABLE_NAME = 'n_refund_log'), 8, '0')))),
+			#{epoint_present},
+			#{epoint_to_refund},
+			#{amount_to_refund},
+			#{epoint_balance},
+			#{which_bank},
+			#{account_holder},
+			#{account_number},
+			#{phone_number}
+		)
+	</insert>
+
+    <select id="getRefundListCnt" parameterType="eney.domain.EpointRefundVO" resultType="java.lang.Integer">
+		select 
+			count(*) 
+		from 
+			(
+			select 
+				@num:=@num+1 rownum,
+				E.*
+			from
+				(SELECT @num:=0) D,
+		 	(select * from n_refund_log
+		 	where userid=#{userid}
+			    ) E
+					  ) Z
+	</select>
+
+    <select id="getRefundList" parameterType="eney.domain.EpointRefundVO" resultType="eney.domain.EpointRefundVO">
+		select 
+			* 
+		from 
+			(
+			select 
+				@num:=@num+1 rownum,
+				E.*
+			from
+				(SELECT @num:=0) D,
+		 	(select * from n_refund_log
+		 	where userid=#{userid}
+			    ) E
+					  ) Z
+		order by charge_date desc			  
+	</select>
+
+    <insert id="insert050AgentBeExpired" parameterType="java.util.Map">
+        INSERT INTO t_agent_del(idx, name, vno, rcv_no, dong_name, dong_yn, colorring_idx, rcvment_idx, sendment_idx,
+        sms, sms_yn, reg_date, login_id, out_sms_yn, rec_yn, user_id, limit_date, del_date)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.idx}, #{item.name}, #{item.vno}, #{item.rcv_no}, #{item.dong_name}, #{item.dong_yn},
+            #{item.colorring_idx}, #{item.rcvment_idx}, #{item.sendment_idx}, #{item.sms}, #{item.sms_yn},
+            #{item.reg_date}, #{item.login_id}, #{item.sms_yn}, #{item.rec_yn}, #{item.user_id}, #{item.limit_date},
+            now())
+        </foreach>
+    </insert>
+
+    <select id="getRcvmentUploadVO" parameterType="eney.domain.ColoringUploadVO"
+            resultType="eney.domain.ColoringUploadVO">
+		select 
+			* 
+		from 
+			(
+			select 
+				@num:=@num+1 rownum,
+				E.*
+			from
+				(SELECT @num:=0) D,
+		 (select 
+		 			idx,
+					id,
+					userid,
+					targetid,
+					C.file_name,
+					description,
+					upload_date,
+					file_id,
+					name,
+					upload_name,
+					category,
+					volume,
+					extenstion
+				from 
+					(SELECT
+			    	idx,
+			    	name gubun,
+			    	file_name,
+			    	reg_date,
+			    	login_id 
+		           FROM t_rcvment_ivr
+		           where remark != 'deleted'
+		           and login_id = #{userid}
+		            ) AS A 
+			    INNER JOIN n_fileupload AS B 
+			    ON A.file_name = B.upload_name
+			    INNER JOIN n_coloring_upload AS C
+			    ON B.refer_id = C.id 
+			   	order by id desc
+			    ) E
+					  ) Z
+		 where
+		 	(
+				(Z.userid = #{userid} and Z.targetid is not NULL) 
+				or (Z.userid is not NULL and Z.targetid = #{userid})
+			) 
+            and Z.idx = #{idx}
+	</select>
+
+    <update id="update050Agent22" parameterType="eney.domain.AgentVO">
+        UPDATE t_agent_ivr_s
+        <set>
+            <if test="rcv_no == null">
+                rcv_no = '',
+            </if>
+            <if test="rcv_no != null">
+                rcv_no = #{rcv_no},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="dong_name != null">
+                dong_name = #{dong_name},
+            </if>
+            <if test="dong_yn != null and dong_yn != ''">
+                dong_yn = #{dong_yn},
+            </if>
+            <if test="colorring_idx != null">
+                colorring_idx = #{colorring_idx},
+            </if>
+            <if test="rcvment_idx != null">
+                rcvment_idx = #{rcvment_idx},
+            </if>
+            <if test="sms_yn != null and sms_yn != ''">
+                sms_yn = #{sms_yn},
+                <if test='sms_yn == "Y"'>
+                    sms = #{sms},
+                    callback_no = #{callback_no},
+                </if>
+                <if test='sms_yn == "M"'>
+                    sms = #{sms},
+                    mms_file = #{mms_file},
+                    callback_no = #{callback_no},
+                </if>
+                <if test='sms_yn == "N"'>
+                    sms = NULL,
+                    callback_no = NULL,
+                    mms_file = NULL,
+                </if>
+            </if>
+            <if test="out_sms_yn != null and out_sms_yn != ''">
+                out_sms_yn = #{out_sms_yn},
+                <if test='out_sms_yn == "Y"'>
+                    out_sms = #{out_sms},
+                    callback_no = #{callback_no},
+                    out_sms_phone = #{out_sms_phone}
+                </if>
+                <if test='out_sms_yn != "Y"'>
+                    out_sms = NULL,
+                    out_sms_phone = NULL
+                </if>
+            </if>
+        </set>
+        where
+        idx = #{idx}
+    </update>
+
+    <update id="update050Agent22ByVno" parameterType="eney.domain.AgentVO">
+		UPDATE t_agent_ivr_s 
+		SET rec_yn = 'Y'
+		WHERE vno = #{vno}
+	</update>
+
+    <update id="skbUseNumber" parameterType="eney.domain.AgentVO">
+		UPDATE skbusenumber
+		SET usenumber = #{usenumber}, nouse = #{nousenumber}, date = sysdate()
+	</update>
+
+    <select id="getUserServiceList" parameterType="eney.domain.ServiceListVO" resultType="eney.domain.ServiceListVO">
+        select
+        *
+        from
+        (
+        select
+        @num:=@num+1 rownum,
+        E.*
+        from
+        (SELECT @num:=0) D,
+        (select * from getapplyservicelist
+        where userid=#{userid}
+        order by reg_date desc
+        ) E
+        ) Z
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            where Z.rownum between #{startRowNo} and #{endRowNo}
+        </if>
+        order by reg_date desc
+    </select>
+
+    <select id="getUserServiceCount" parameterType="eney.domain.ServiceListVO" resultType="Integer">
+		SELECT count(*) FROM getapplyservicelist
+		where userid = #{userid}
+	</select>
+
+    <select id="getAgentVOByVno" parameterType="java.lang.String" resultType="eney.domain.AgentVO">
+		select
+		ivr.idx,
+		ivr.name,
+		ivr.vno,
+		ivr.rcv_no,
+		ivr.dong_name,
+		ivr.dong_yn,
+		ivr.colorring_idx,
+		ivr.rcvment_idx,
+		ivr.sendment_idx,
+		ivr.sms,
+		ivr.sms_yn,
+		ivr.out_sms,
+		ivr.out_sms_yn,
+		ivr.login_id,
+		ivr.reg_date,
+		ivr.user_id,
+		ivr.limit_date,
+		(
+		SELECT count(link_url)
+		FROM n_link_info info
+		WHERE info.link_url = concat('tel:', ivr.vno)
+		AND info.link_type = 3
+		AND info.link_delete = false
+		) as make_click_to_call
+		from t_agent_ivr as ivr
+		where ivr.vno = #{vno}
+	</select>
+
+    <select id="getAgentVOByVno22" parameterType="java.lang.String" resultType="eney.domain.AgentVO">
+		select
+		ivr.idx,
+		ivr.name,
+		ivr.vno,
+		ivr.rcv_no,
+		ivr.dong_name,
+		ivr.dong_yn,
+		ivr.colorring_idx,
+		ivr.rcvment_idx,
+		ivr.sendment_idx,
+		ivr.sms,
+		ivr.sms_yn,
+		ivr.out_sms,
+		ivr.out_sms_yn,
+		ivr.login_id,
+		ivr.reg_date,
+		ivr.user_id,
+		ivr.limit_date,
+		(
+		SELECT count(link_url)
+		FROM n_link_info info
+		WHERE info.link_url = concat('tel:', ivr.vno)
+		AND info.link_type = 3
+		AND info.link_delete = false
+		) as make_click_to_call,
+		ivr.callback_no,
+		ivr.out_sms_phone,
+		ivr.mms_file
+		from t_agent_ivr_s as ivr
+		where ivr.vno = #{vno}
+	</select>
+
+    <select id="getAgentAddress" parameterType="String" resultMap="agentAddressMap">
+		SELECT * FROM agent_address
+		where vno = #{vno}
+	</select>
+
+    <update id="updateAgentAddress" parameterType="eney.domain.AgentAddressVO">
+		UPDATE agent_address
+        SET
+        address = #{address},
+        road_address = #{roadAddress},
+        jibun_address = #{jibunAddress},
+        building_name = #{buildingName},
+        sido = #{sido},
+        sigungu = #{sigungu},
+        roadname = #{roadname},
+        bname = #{bname},
+        bname1 = #{bname1},
+        zonecode = #{zonecode},
+        detail_address = #{detailAddress}
+        WHERE vno = #{vno}
+	</update>
+
+<!--    <update id="bulkUpdate0507Agent" parameterType="eney.domain.AgentVO">-->
+<!--        UPDATE t_agent_ivr_s-->
+<!--        <set>-->
+<!--            rcv_no = #{rcv_no},-->
+<!--            name = #{name},-->
+<!--            dong_name = #{dong_name},-->
+<!--            <if test="dong_yn != null and dong_yn != ''">-->
+<!--                dong_yn = #{dong_yn},-->
+<!--            </if>-->
+<!--        </set>-->
+<!--        <where>-->
+<!--            vno = #{vno}-->
+<!--            and user_id = #{user_id}-->
+<!--        </where>-->
+<!--    </update>-->
+
+    <update id="bulkUpdate0507Agent" parameterType="java.util.ArrayList">
+        <foreach item="item" collection="list" separator=";">
+            UPDATE t_agent_ivr_s
+            <set>
+                rcv_no = #{item.rcv_no},
+                name = #{item.name},
+                dong_name = #{item.dong_name},
+                <if test="dong_yn != null and dong_yn != ''">
+                    dong_yn = #{item.dong_yn},
+                </if>
+            </set>
+            <where>
+                vno = #{item.vno}
+                and user_id = #{item.user_id}
+            </where>
+        </foreach>
+    </update>
+    <update id="bulkUpdate0506Agent" parameterType="java.util.ArrayList">
+        <foreach item="item" collection="list" separator=";">
+            UPDATE t_agent_ivr
+            <set>
+                rcv_no = #{item.rcv_no},
+                name = #{item.name},
+                dong_name = #{item.dong_name},
+                <if test="item.dong_yn != null and item.dong_yn != ''">
+                    dong_yn = #{item.dong_yn},
+                </if>
+            </set>
+            <where>
+                vno = #{item.vno}
+                and user_id = #{item.user_id}
+            </where>
+        </foreach>
+    </update>
+
+<!--    <update id="bulkUpdate0506Agent" parameterType="eney.domain.AgentVO">-->
+<!--        UPDATE t_agent_ivr-->
+<!--        <set>-->
+<!--            rcv_no = #{rcv_no},-->
+<!--            name = #{name},-->
+<!--            dong_name = #{dong_name},-->
+<!--            <if test="dong_yn != null and dong_yn != ''">-->
+<!--                dong_yn = #{dong_yn},-->
+<!--            </if>-->
+<!--        </set>-->
+<!--        <where>-->
+<!--            vno = #{vno}-->
+<!--            and user_id = #{user_id}-->
+<!--        </where>-->
+<!--    </update>-->
+
+
+    <select id="getMessageTemplateListCnt" parameterType="eney.domain.MessageTemplateVO" resultType="java.lang.Integer">
+        select count(*)
+        from m_template
+        where userid = #{userid}
+    </select>
+
+    <select id="getMessageTemplateList" parameterType="eney.domain.MessageTemplateVO"
+            resultType="eney.domain.MessageTemplateVO">
+
+        SELECT *
+        FROM
+        (
+        SELECT
+        @num:=@num+1 rownum,
+        E.*
+        FROM
+        (SELECT @num:=0) D,
+        (
+        SELECT * FROM m_template where userid = #{userid}
+        ORDER by idx DESC
+        ) E
+        )Z
+        <where>
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                Z.rownum between #{startRowNo} and #{endRowNo}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getMessageResultList" parameterType="Map"
+            resultType="eney.domain.MsgResultVO">
+
+
+        SELECT *
+        FROM (
+        SELECT @num := @num + 1 rownum,
+        E.*
+        FROM (SELECT @num := 0) D,
+        (
+--         select *
+        SELECT A.*,sum(A.result = '100') as 'success' , sum(A.result != '100') as 'fail'
+        from (
+
+
+        <if test="month0 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month0}
+
+            <if test="month1 != null">
+                union all
+            </if>
+        </if>
+
+        <if test="month1 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month1}
+
+            <if test="month2 != null">
+                union all
+            </if>
+
+        </if>
+
+        <if test="month2 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month2}
+
+            <if test="month3 != null">
+                union all
+            </if>
+
+        </if>
+
+        <if test="month3 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month3}
+
+            <if test="month4 != null">
+                union all
+            </if>
+
+        </if>
+        <if test="month4 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month4}
+
+            <if test="month5 != null">
+                union all
+            </if>
+
+        </if>
+        <if test="month5 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month5}
+        </if>
+
+
+        ) A
+        where A.opt_post is not null and DATE(A.request_time) between #{startDate} and #{endDate} and A.opt_id = #{userid}
+
+        group by A.opt_post
+        order by A.request_time desc
+        ) E
+        ) Z
+        <where>
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                Z.rownum between #{startRowNo} and #{endRowNo}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="getMessageResultListCnt" parameterType="Map" resultType="java.lang.Integer">
+
+
+        SELECT count(*)
+        FROM (
+        SELECT @num := @num + 1 rownum,
+        E.*
+        FROM (SELECT @num := 0) D,
+        (
+        select *
+        from (
+
+
+        <if test="month0 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month0}
+
+            <if test="month1 != null">
+                union all
+            </if>
+        </if>
+
+        <if test="month1 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month1}
+
+            <if test="month2 != null">
+                union all
+            </if>
+
+        </if>
+
+        <if test="month2 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month2}
+
+            <if test="month3 != null">
+                union all
+            </if>
+
+        </if>
+
+        <if test="month3 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month3}
+
+            <if test="month4 != null">
+                union all
+            </if>
+
+        </if>
+        <if test="month4 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month4}
+
+            <if test="month5 != null">
+                union all
+            </if>
+
+        </if>
+        <if test="month5 != null">
+            select mseq, msg_type, send_type, dstaddr, callback, subject, request_time, send_time, result, opt_id, opt_post
+            from eney.msg_result_${month5}
+        </if>
+
+
+        ) A
+        where A.opt_post is not null and DATE(A.request_time) between #{startDate} and #{endDate} and A.opt_id = #{userid}
+
+        group by A.opt_post
+        order by A.request_time desc
+        ) E
+        ) Z
+
+    </select>
+
+
+    <select id="getMessageTemplateDetail" parameterType="Integer"
+            resultType="eney.domain.MessageTemplateVO">
+        select *
+        from m_template
+        where idx = #{idx}
+    </select>
+
+    <select id="deleteMessageTemplate" parameterType="Integer"
+            resultType="java.lang.Integer">
+        delete from m_template
+        where idx = #{idx}
+    </select>
+
+    <insert id="insertMessageTemplateList" parameterType="eney.domain.MessageTemplateVO">
+		INSERT INTO m_template (userid, msg_type, subject, text) VALUES(#{userid}, #{msg_type}, #{subject}, #{text});
+	</insert>
+
+    <update id="updateMessageTemplateList" parameterType="eney.domain.MessageTemplateVO">
+		UPDATE m_template
+		SET
+		subject = #{subject},
+		text = #{text}
+		WHERE idx = #{idx}
+	</update>
+
+
+    <select id="getMsgResultTableList" resultType="Map">
+		SELECT * FROM information_schema.tables WHERE table_schema = 'eney' AND TABLE_NAME LIKE 'msg_result_%' ORDER BY CREATE_TIME DESC;
+	</select>
+
+    <select id="getBlockNumberList" resultType="eney.domain.BlockNumberVO">
+		SELECT * FROM n_service_080
+		;
+	</select>
+
+    <select id="getBlockNumberListCnt" resultType="int">
+        SELECT count(*) FROM n_service_080
+        <choose>
+            <when test="userid == 'eney1982'">
+                ;
+            </when>
+            <otherwise>
+                where userid = #{userid};
+            </otherwise>
+
+        </choose>
+
+
+    </select>
+
+
+    <select id="webSendSMS" parameterType="eney.domain.WebSmsSendVO" resultType="int">
+        {call eney.WEB_SEND_SMS(
+        #{userid,jdbcType=VARCHAR},
+        #{msg_type,jdbcType=VARCHAR},
+        #{dstaddr,jdbcType=VARCHAR},
+        #{callback,jdbcType=VARCHAR},
+        #{subject,jdbcType=VARCHAR},
+        #{text,jdbcType=VARCHAR},
+        <if test="request_time == 'IMMEDIATE'">
+            NOW(),
+        </if>
+
+        <if test="request_time != 'IMMEDIATE'">
+            #{request_time},
+        </if>
+        #{post_key,jdbcType=VARCHAR},
+
+
+        <choose>
+            <when test="fileloc1 == null">
+                null,
+            </when>
+            <otherwise>
+                #{fileloc1, jdbcType=VARCHAR},
+            </otherwise>
+
+        </choose>
+
+        @result
+        )
+        }
+    </select>
+
+
+</mapper>

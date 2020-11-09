@@ -1,0 +1,53 @@
+.modal {
+    background: rgba(0, 0, 0, 0.4);
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    display: none;
+    z-index: 999;
+}
+
+.modal:before{
+    content: '';
+    display: inline-block;
+    height: 100%;
+    width: 0;
+    vertical-align: middle;
+}
+
+.modal_div {
+    display: inline-block;
+    vertical-align: middle;
+    background: #fff;
+    width: 22%;
+    max-height: 80%;
+    text-align: center;
+    position: relative;
+    overflow: auto;
+    padding:15px 60px;
+    z-index:1;
+    border-top:15px solid #37afe5;
+}
+.modal_div .modal_title h1 {font-size:24px;text-align: center;margin:10px auto;}
+.modal_div .modal_title h4{font-size:18px;margin:10px auto;}
+.modal_div .modal_title p {font-size:16px;margin:10px auto;}
+.modal_div .modal_title img {padding:20px 0;}
+.modal_div .modal_title .modal_tilte_border{background:#004b9e;height:3px;width:45px;margin:0 auto;}
+.modal_div .modal_content {margin:20px 0;}
+.modal_div .modal_content p  {font-size:18px;line-height: 1.5;padding:20px 0;}
+.modal_div .modal_content input[type=password]{width:100%;padding-left: 10px;height: 38px;line-height: 38px;border: 1px solid #ccc;box-sizing: border-box;margin:10px 0;}
+
+.modal_close {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+}
+
+.modal_div .basic-btn02{
+    margin:0 1px; width:49%; box-sizing:border-box;border-radius:0;
+    height:38px;line-height:36px;font-size:16px;
+}
+

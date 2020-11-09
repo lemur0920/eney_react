@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="shortUrl">
+
+
+	<insert id="insertBasicInfo" parameterType="eney.domain.ShortUrlBasicVO" >
+			INSERT INTO n_shorturl_basic
+			(
+			n_original_url,
+			user_id,
+			title,
+			description
+			)
+			VALUES (
+			#{original_url},
+			#{user_id},
+			#{title},
+			#{description}
+			)
+		<selectKey resultType="Integer" keyProperty="url_idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+
+
+	</insert>
+
+	<insert id="insertJoinInfo" parameterType="eney.domain.ShortUrlJoinVO">
+		INSERT INTO n_shorturl_join
+		(
+		url_idx,
+		n_short_url,
+		n_channel
+		)
+		VALUES
+		(
+		#{urlIdx},
+		#{shortUrl},
+		#{channel}
+		)
+
+
+	</insert>
+
+	<insert id="insertAnalyticsInfo" parameterType="java.lang.String">
+	insert into
+	n_shorturl_info
+	(n_short_url)
+	values(
+	#{VALUE }
+	)
+
+	</insert>
+
+	<select id="findUrlByShortUrl" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT
+		n_original_url
+		from
+		n_shorturl_basic a,
+		n_shorturl_join b
+		where
+		a.url_idx=b.url_idx
+		and
+		b.n_short_url=#{VALUE };
+	</select>
+
+	
+</mapper>

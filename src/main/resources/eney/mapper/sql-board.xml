@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="board">
+
+	<select id="getContent" parameterType="eney.domain.BoardContentVO" resultType = "eney.domain.BoardContentVO">
+		select *
+		from (select * from n_board_content where content_id = #{content_id}) A
+		left outer join (
+		select *
+		from n_fileupload
+		where category = (
+		SELECT board_eng_name
+		FROM n_board_config
+		where board_id = #{board_id})
+		) C on A.content_id = C.refer_id
+	</select>
+
+	<select id = "getBoardContent" parameterType="eney.domain.BoardContentVO" resultType = "eney.domain.BoardContentVO">
+		select * from n_board_content where content_id = #{content_id} and board_id = #{board_id}
+		union all (SELECT * FROM n_board_content where  <![CDATA[content_id < #{content_id}]]>  and board_id = #{board_id} ORDER BY content_id DESC LIMIT 1)
+		union all (select * from n_board_content where  <![CDATA[content_id > #{content_id}]]>  and board_id = #{board_id} order by content_id ASC LIMIT 1)
+	</select>
+	
+	<update id="updateHits" parameterType="int">
+		UPDATE n_board_content SET
+			hits = IFNULL(hits,0) + 1
+		WHERE content_id = #{contentId}
+	</update>
+	
+	<select id="getBoardContentListCnt" parameterType="eney.domain.BoardContentVO" resultType="java.lang.Integer">
+		select 
+			count(*)
+		from
+		n_board_content where board_id = #{board_id}
+	</select>
+	<select id="getBoardContentList" parameterType="eney.domain.BoardContentVO" resultType = "eney.domain.BoardContentVO">
+		SELECT
+			rownum,
+			content_id,
+			board_id,
+			title,
+			content,
+			writer_id,
+			hits,
+			write_date,
+			update_date,
+			file_id,
+			name,
+			upload_name,
+			category,
+			volume,
+			extenstion
+		FROM (
+		   SELECT a.*,
+		           (CASE @vcontent_id WHEN a.content_id THEN @rownum:=@rownum ELSE @rownum:=@rownum+1 END) rownum,
+		           (@vcontent_id:=a.content_id) vjob
+		   FROM (
+			select
+			A.content_id,
+			A.board_id,
+			A.title,
+			A.content,
+			A.writer_id,
+			A.hits,
+			A.write_date,
+			A.update_date,
+			B.file_id,
+			B.name,
+			B.upload_name,
+			B.category,
+			B.volume,
+			B.extenstion
+		from
+		(select
+			content_id,
+			board_id,
+			title,
+			content,
+			writer_id,
+			hits,
+			write_date,
+			update_date
+		 from n_board_content where board_id = #{board_id}) A
+		left outer join (select * from n_fileupload where category = (SELECT board_eng_name FROM n_board_config where board_id = #{board_id}) ) B on A.content_id = B.refer_id
+		order by write_date desc
+		   ) a, (SELECT @vcontent_id:='', @rownum:=0 FROM DUAL) b
+		   #ORDER BY a.job, a.sal
+		) c
+		<where>
+			<if test="pagination_flag != false">
+				rownum between #{present_first_item_idx} and #{present_last_item_idx}
+			</if>
+			<if test="start_date != '' and start_date != null">
+				and write_date > #{start_date}
+			</if>
+			<if test="end_date != '' and end_date != null">
+				and write_date > #{end_date}
+			</if>
+		</where>
+	</select>
+	<delete id="deleteBoardContent" parameterType="eney.domain.BoardContentVO">
+		delete from n_board_content
+		where content_id = #{content_id}	
+	</delete>
+	
+	<delete id="deleteContent" parameterType="eney.domain.BoardContentVO">
+		delete from n_board_content
+		where content_id = #{content_id}	
+	</delete>	
+	<insert id="insertBoardContent" parameterType="eney.domain.BoardContentVO">
+		INSERT INTO n_board_content
+		(
+			board_id,
+			title,
+			content,
+			writer_id,
+			write_date,
+			group_number,
+			condition_number
+		)
+		VALUES
+		(
+			#{board_id},
+			#{title},
+			#{content},
+			#{writer_id},
+			sysdate(),
+			#{group_number},
+			#{condition_number}
+
+		)
+		<selectKey resultType="int" keyProperty="content_id" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+	<update id="updateBoardContent" parameterType="eney.domain.BoardContentVO">
+		UPDATE n_board_content SET
+			title = #{title},
+			content = #{content},
+<!--			<if test="group_number != null and group_number != ''">-->
+				group_number = #{group_number},
+<!--			</if>-->
+<!--			<if test="condition_number != null and condition_number != ''">-->
+				condition_number = #{condition_number},
+<!--			</if>-->
+			update_date = sysdate()
+		WHERE content_id = #{content_id}
+	</update>
+
+	<select id="getBoardConfigByPath" parameterType="java.lang.String" resultType="eney.domain.BoardConfigVO">
+		select
+			*
+		from n_board_config
+		where board_eng_name = #{board_name}
+	</select>
+
+	<select id="getBoardContentListById" resultType = "eney.domain.BoardContentVO">
+		 SELECT *
+         FROM
+			(
+			SELECT
+				@num:=@num+1 rownum,
+				E.*
+                FROM
+					(SELECT @num:=0) D,
+				(SELECT *
+				FROM n_board_content
+				WHERE board_id=#{board_id}
+				ORDER by group_number, write_date DESC
+                ) E
+			)Z
+		<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+			where Z.rownum between #{startRowNo} and #{endRowNo}
+		</if>
+
+	</select>
+
+	<select id="getTotalContentCountById" resultType="java.lang.Integer">
+		select
+		count(*)
+		from
+		n_board_content where board_id = #{VALUE }
+	</select>
+</mapper>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="alert">
+	<select id="getReloadData" parameterType="eney.domain.AlertVO" resultType="eney.domain.AlertVO">
+		select * from n_alerts where puller_id = #{puller_id} and check_yn = #{check_yn}
+	</select>
+	
+	<select id="getExpireVnoUserList" parameterType="eney.domain.AlertVO" resultType="java.util.HashMap">
+		<![CDATA[
+		select user_id, count(*) as 'count', DATE_FORMAT(limit_date, '%Y-%m-%d') as 'ldate'
+		from getAgent
+		]]>
+		<if test="item_code == '050_EXPIRE_DAY'">
+			<![CDATA[ 
+			where limit_date < date_add(now(), interval 1 day) and limit_date > date_add(now(), interval 0 day) and limit_date > now()
+			]]>
+		</if>
+		<if test="item_code == '050_EXPIRE_WEEK'">
+			<![CDATA[ 
+			where limit_date < date_add(now(), interval 7 day) and limit_date > date_add(now(), interval 6 day) and limit_date > now()
+			]]>
+		</if>
+		group by user_id, ldate
+	</select>
+		
+	<select id="getExpireServicePatchcallList" parameterType="eney.domain.AlertVO" resultType="java.util.HashMap">
+		<![CDATA[
+		select userid, count(*) as 'count', DATE_FORMAT(end_date, '%Y-%m-%d') as 'ldate'
+		from n_service_patchcall
+		]]> 
+		<if test="item_code == 'SERVICE_PATCHCALL_EXPIRE_DAY'">
+			<![CDATA[ 
+			where end_date < date_add(now(), interval 1 day) and end_date > date_add(now(), interval 0 day) and end_date > now()
+			]]>
+		</if>
+		<if test="item_code == 'SERVICE_PATCHCALL_EXPIRE_WEEK'">
+			<![CDATA[ 
+			where end_date < date_add(now(), interval 7 day) and end_date > date_add(now(), interval 6 day) and end_date > now()
+			]]>
+		</if>
+		group by userid, ldate
+	</select>
+	
+	<select id="getExpireServiceRecordList" parameterType="eney.domain.AlertVO" resultType="java.util.HashMap">
+		<![CDATA[
+		select userid, count(*) as 'count', DATE_FORMAT(end_date, '%Y-%m-%d') as 'ldate'
+		from n_service_record
+		]]> 
+		<if test="item_code == 'SERVICE_RECORD_EXPIRE_DAY'">
+			<![CDATA[ 
+			where end_date < date_add(now(), interval 1 day) and end_date > date_add(now(), interval 0 day) and end_date > now()
+			]]>
+		</if>
+		<if test="item_code == 'SERVICE_RECORD_EXPIRE_WEEK'">
+			<![CDATA[ 
+			where end_date < date_add(now(), interval 7 day) and end_date > date_add(now(), interval 6 day) and end_date > now()
+			]]>
+		</if>
+		group by userid, ldate
+	</select>
+	
+	<select id="getExpireServiceCallbackList" parameterType="eney.domain.AlertVO" resultType="java.util.HashMap">
+		<![CDATA[
+		select userid, count(*) as 'count', DATE_FORMAT(end_date, '%Y-%m-%d') as 'ldate'
+		from n_service_callback_sms
+		]]> 
+		<if test="item_code == 'SERVICE_CALLBACK_EXPIRE_DAY'">
+			<![CDATA[ 
+			where end_date < date_add(now(), interval 1 day) and end_date > date_add(now(), interval 0 day) and end_date > now()
+			]]>
+		</if>
+		<if test="item_code == 'SERVICE_CALLBACK_EXPIRE_WEEK'">
+			<![CDATA[ 
+			where end_date < date_add(now(), interval 7 day) and end_date > date_add(now(), interval 6 day) and end_date > now()
+			]]>
+		</if>
+		group by userid, ldate
+	</select>
+	
+	<select id="getExpireServiceWebList" parameterType="eney.domain.AlertVO" resultType="java.util.HashMap">
+		<![CDATA[
+		select userid, count(*) as 'count', DATE_FORMAT(end_date, '%Y-%m-%d') as 'ldate'
+		from n_service_web
+		]]> 
+		<if test="item_code == 'SERVICE_WEB_EXPIRE_DAY'">
+			<![CDATA[ 
+			where end_date < date_add(now(), interval 1 day) and end_date > date_add(now(), interval 0 day) and end_date > now()
+			]]>
+		</if>
+		<if test="item_code == 'SERVICE_WEB_EXPIRE_WEEK'">
+			<![CDATA[ 
+			where end_date < date_add(now(), interval 7 day) and end_date > date_add(now(), interval 6 day) and end_date > now()
+			]]>
+		</if>
+		group by userid, ldate
+	</select>
+	
+	<select id="getAlertItemInfo" parameterType="eney.domain.AlertVO" resultType="eney.domain.AlertVO">
+		select
+			*
+		from n_alert_item
+		where item_code = #{item_code}	
+	</select>
+	
+	<insert id="pushAlertExpireVno" parameterType="eney.domain.AlertVO" >
+		INSERT INTO n_alerts (
+	      alert_code, pusher_id, puller_id, type, menu_name, description
+	    ) VALUES 
+	    <foreach item="vno" collection="vno_list" separator=",">
+			( #{item_code}, #{pusher_id}, #{vno.user_id}, #{type}, #{menu_name}, concat(cast(${vno.count} as char), #{description}) )
+	    </foreach>
+	</insert>
+	
+	<!-- 알람전송 -->
+	<insert id="insertAlert" parameterType="eney.domain.AlertVO" >
+		INSERT INTO n_alerts (
+	      alert_code, pusher_id, puller_id, type, menu_name, description
+	    ) VALUE 
+		( #{item_code}, #{pusher_id}, #{puller_id}, #{type}, #{menu_name}, #{description} )
+		<selectKey resultType="Integer" keyProperty="alert_id" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert> 
+	
+	<select id="getAlertVOById" parameterType="java.lang.Integer" resultType="eney.domain.AlertVO">
+		select * from n_alerts where alert_id = #{alert_id}
+	</select>
+	
+	<update id="updateAlert" parameterType="eney.domain.AlertVO">
+		update n_alerts set 
+			check_yn = #{check_yn}
+		where alert_id = #{alert_id} and puller_id = #{puller_id}	
+	</update>
+	    
+</mapper>

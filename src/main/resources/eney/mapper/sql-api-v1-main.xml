@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="api-v1-main">
+
+	<!-- ** 토큰 관련 부분  **-->
+	<!-- * 토큰 생성 * -->
+	<insert id="insertTokenInfo" parameterType="eney.api.v1.domain.ApiTokenVo">
+		INSERT
+		INTO n_api_tokens(
+		token_key,
+		token_userid,
+		token_expiration_date,
+		token_issued_date
+		<if test="token_enable_yn != null">
+			,token_enable_yn
+		</if>
+		<if test="service != null">
+			,service
+		</if>
+		<if test="allocation_ip != null">
+			,allocation_ip
+		</if>
+		)
+		VALUES(
+		#{token_key},
+		#{token_userid},
+		#{token_expiration_date},
+		now()
+		<if test="token_enable_yn != null">
+			,#{token_enable_yn}
+		</if>
+		<if test="service != null">
+			,#{service}
+		</if>
+		<if test="allocation_ip != null">
+			,#{allocation_ip}
+		</if>
+		)
+		<selectKey resultType="Integer" keyProperty="token_idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<insert id="insertMessageTokenInfo" parameterType="eney.api.v1.domain.ApiTokenVo">
+		INSERT
+		INTO n_api_message_tokens(
+		token_key,
+		token_userid,
+		token_expiration_date,
+		token_issued_date
+		<if test="token_enable_yn != null">
+			,token_enable_yn
+		</if>
+		<if test="service != null">
+			,service
+		</if>
+		<if test="allocation_ip != null">
+			,allocation_ip
+		</if>
+		)
+		VALUES(
+		#{token_key},
+		#{token_userid},
+		#{token_expiration_date},
+		now()
+		<if test="token_enable_yn != null">
+			,#{token_enable_yn}
+		</if>
+		<if test="service != null">
+			,#{service}
+		</if>
+		<if test="allocation_ip != null">
+			,#{allocation_ip}
+		</if>
+		)
+		<selectKey resultType="Integer" keyProperty="token_idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<!-- * 토큰 키를 기준으로 토큰 검색  *-->
+	<select id="selectTokenInfo" parameterType="Integer" resultType="eney.api.v1.domain.ApiTokenVo">
+		SELECT token_idx, token_key, token_userid, token_expiration_date, token_enable_yn, token_issued_date
+		FROM eney.n_api_tokens
+		WHERE token_key = #{token_key}
+	</select>
+	<select id="selectMessageTokenInfo" parameterType="Integer" resultType="eney.api.v1.domain.ApiTokenVo">
+		SELECT token_idx, token_key, token_userid, token_expiration_date, token_enable_yn, token_issued_date
+		FROM eney.n_api_message_tokens
+		WHERE token_key = #{token_key}
+	</select>
+
+	<!-- * 검색 조건을 기준으로 토큰 검색 * -->
+	<select id="selectTokenInfoQuery" parameterType="eney.api.v1.domain.ApiTokenVo" resultType="eney.api.v1.domain.ApiTokenVo">
+		SELECT token_idx, token_key, token_userid, token_expiration_date, token_enable_yn, token_issued_date
+		FROM n_api_tokens
+		<where>
+			<if test="token_idx != null">
+				and token_idx = #{token_idx}
+			</if>
+			<if test="token_key != null">
+				and token_key = #{token_key}
+			</if>
+			<if test="token_userid != null">
+				and token_userid = #{token_userid}
+			</if>
+			<if test="token_expiration_date != null">
+				and token_expiration_date = #{token_expiration_date}
+			</if>
+			<if test="token_expiration_date == null">
+				and (
+				token_expiration_date is null
+				or token_expiration_date > now())
+			</if>
+			<if test="token_enable_yn != null">
+				and token_enable_yn = #{token_enable_yn}
+			</if>
+			<if test="token_enable_yn == null">
+				and token_enable_yn = 1
+			</if>
+			<if test="token_issued_date != null">
+				and token_issued_date = #{token_issued_date}
+			</if>
+		</where>
+	</select>
+	<select id="selectMessageTokenInfoQuery" parameterType="eney.api.v1.domain.ApiTokenVo" resultType="eney.api.v1.domain.ApiTokenVo">
+		SELECT token_idx, token_key, token_userid, token_expiration_date, token_enable_yn, token_issued_date
+		FROM n_api_message_tokens
+		<where>
+			<if test="token_idx != null">
+				and token_idx = #{token_idx}
+			</if>
+			<if test="token_key != null">
+				and token_key = #{token_key}
+			</if>
+			<if test="token_userid != null">
+				and token_userid = #{token_userid}
+			</if>
+			<if test="token_expiration_date != null">
+				and token_expiration_date = #{token_expiration_date}
+			</if>
+			<if test="token_expiration_date == null">
+				and (
+				token_expiration_date is null
+				or token_expiration_date > now())
+			</if>
+			<if test="token_enable_yn != null">
+				and token_enable_yn = #{token_enable_yn}
+			</if>
+			<if test="token_enable_yn == null">
+				and token_enable_yn = 1
+			</if>
+			<if test="token_issued_date != null">
+				and token_issued_date = #{token_issued_date}
+			</if>
+		</where>
+	</select>
+
+	<!--	모든 토큰 리스트 조회-->
+	<select id="selectTokenAllInfoList" parameterType="eney.api.v1.domain.ApiTokenVo" resultType="eney.api.v1.domain.ApiTokenVo">
+		select
+		*
+		from
+		(
+		select
+		@num:=@num+1 rownum,
+		E.*
+		from
+		(SELECT @num:=0) D,
+		(
+		SELECT * from (
+		SELECT * FROM eney.n_api_message_tokens
+		union all
+		SELECT * FROM eney.n_api_tokens) as b
+		where b.token_userid = #{token_userid}
+		order by token_issued_date desc
+		) E
+		) Z
+		<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+			where Z.rownum between #{startRowNo} and #{endRowNo}
+		</if>
+
+	</select>
+	<!--	모든 토큰 리스트 카운트-->
+	<select id="selectTokenAllInfoListCnt" parameterType="eney.api.v1.domain.ApiTokenVo" resultType="java.lang.Integer">
+		select
+		count(*)
+		from
+		(
+		select
+		@num:=@num+1 rownum,
+		E.*
+		from
+		(SELECT @num:=0) D,
+		(
+			SELECT * from (
+			SELECT * FROM eney.n_api_message_tokens
+			union all
+			SELECT * FROM eney.n_api_tokens) as b
+			where b.token_userid = #{token_userid}
+		) E
+		) Z
+	</select>
+
+
+	<!-- 토큰 정보 수정 -->
+	<update id="updateTokenInfo" parameterType="eney.api.v1.domain.ApiTokenVo" >
+		UPDATE n_api_tokens
+		<set>
+			<if test="token_expiration_date != null">token_expiration_date=#{token_expiration_date},</if>
+			<if test="token_enable_yn != null">token_enable_yn=#{token_enable_yn},</if>
+		</set>
+		WHERE
+		<if test="token_idx != null">
+			token_idx = #{token_idx}
+		</if>
+		<if test="token_idx == null">
+			token_key = #{token_key}
+		</if>
+	</update>
+
+	<!-- 로그 정보 입력 -->
+	<insert id="insertApiLog" parameterType="eney.api.v1.domain.ApiLogVo">
+		INSERT INTO n_api_logs (log_token_idx, log_category, log_statuscode, log_tokenkey, log_userid, log_event, log_ipaddress, log_date, log_elapsed_time)
+		VALUES (#{log_token_idx}, #{log_category}, #{log_statuscode}, #{log_tokenkey}, #{log_userid}, #{log_event}, #{log_ipaddress}, now(), #{log_elapsed_time})
+	</insert>
+</mapper>

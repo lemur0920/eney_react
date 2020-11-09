@@ -1,0 +1,44 @@
+.api_token .start_sub_title_txt p font {font-size: 13px;color: #37afe5;letter-spacing: normal;}
+.tbl_api{    
+	width: 100%;
+    border-top: solid 1px #e3e3e3;
+    border-bottom: solid 1px #eaeaea;
+    table-layout: fixed;
+    margin-top: 11px;
+    border-collapse: collapse;
+    }
+.api_token th:first-child {
+    border-left: 0;
+    
+    }
+.api_token th {
+    background-color: #f7f7f7;
+    border-bottom: solid 1px #eaeaea;
+    border-left: solid 1px #eaeaea;
+    padding: 8px 0;
+    font-size: 12px;
+    font-weight: bold;
+    color: #585858;
+    text-align: center;
+}
+.api_token td:first-child {
+    border-left: 0;
+}
+.api_token td {
+    border: solid 1px #eaeaea;
+    padding: 20px 0;
+    text-align: center;
+    word-break: keep-all;
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+    color: #555555;
+}
+.api_token img.sub_step_img {
+   width: 90%;
+    border: 3px solid #ccc;
+    margin: 30px;
+    padding: 5px;
+}
+
+.api_token .txt1 {text-align:left;}

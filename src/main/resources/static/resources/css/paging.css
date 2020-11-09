@@ -1,0 +1,10 @@
+.paging {position:relative;text-align:center; margin:30px 0;}
+.paging > .page-left { display:inline-block; zoom:1;*display:inline;}
+.paging > .page-right {display:inline-block; zoom:1;*display:inline;}
+.paging > .number {display:inline-block; margin-left:10px; margin-right:10px; }
+.paging a {display:inline-block;zoom:1;*display:inline; width:28px; height:28px; line-height:28px; color:#888888; font-size:12px; border:1px solid #cccccc; vertical-align:middle; margin-left:2px; }
+.paging a.on, .paging a:hover, .paging a:focus {border:1px solid #37afe5; color:#37afe5; font-weight:bold;}
+.paging a:first-child {margin-left:0; }
+.page-left a:hover, .page-right a:hover {border:1px solid #dedede;}
+.paging a.btn-prev {background:url(../img/btn_prv.gif) no-repeat center center; }
+.paging a.btn-next {background:url(../img/btn_next.gif)  no-repeat center center;}

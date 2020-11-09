@@ -1,0 +1,60 @@
+.helper_text{padding:10px;}
+.coloring_apply_form .off {background-color: white; border:1px solid #37afe5; color:#37afe5;}
+.coloring_apply_form .radio_group{
+    display: inline-block;
+}
+
+.coloring_apply_form .radio_group span{
+    font-size: 12px;
+}
+.coloring_apply_form .radio_group .inputLabel{
+    margin-left: 3px;
+    margin-right: 5px;
+}
+
+.coloring_apply_form .radio_group button{
+    width:20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 24px;
+}
+.coloring_apply_form .radio_group .playing{
+    background-image: url(../../image/stop_icon.jpg);
+    background-size: cover;
+}
+.coloring_apply_form .radio_group .paused{
+    background-image: url(../../image/play_icon.jpg);
+    background-size: cover;
+
+}
+
+
+/*.coloring_apply_form .coloring_apply_table{*/
+/*    border: 1px solid lightgrey;*/
+/*}*/
+
+/*.coloring_apply_form .coloring_apply_table tr{*/
+/*    border: 1px solid lightgrey;*/
+/*}*/
+.coloring_apply_form .coloring_apply_table td{
+    padding:10px;
+    border: 1px solid lightgrey;
+}
+.coloring_apply_form .coloring_apply_table td:first-child{
+    border-left: none;
+}
+.coloring_apply_form .coloring_apply_table td:last-child{
+    border-right: none;
+}
+
+.coloring_apply_form .coloring_apply_table textarea{
+    width: 98%;
+    padding: 10px;
+    height: 100px;
+}
+
+.submit_box{ text-align: center;}
+.submit_box .agree_box{ display: block;
+    font-size: 15px; padding-top: 40px;padding-bottom: 40px;}
+.submit_box .submit_btn{ width:30%;
+    height: 50px;}

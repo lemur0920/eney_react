@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="sj_kakao">
+
+    <insert id="insertKakaoTemplate" parameterType="hashmap">
+				INSERT INTO m_kakao_template (userid, sender_key, uuid, name, template_name, template_content, template_code) VALUES(#{userid}, #{sender_key}, #{uuid}, #{name}, #{template_name}, #{template_content}, #{template_code} );
+	</insert>
+
+    <insert id="insertSenderProfile" parameterType="hashmap">
+				INSERT INTO m_kakao_sender_profile (userid, sender_key, uuid, name, created_at) VALUES(#{userid}, #{sender_key}, #{uuid}, #{name}, #{created_at} );
+	</insert>
+
+
+    <insert id="deleteSenderProfile" parameterType="hashmap">
+		{
+		call DEL_KAKAO_PROFILE(#{userid}, #{senderKey}, @result)
+		}
+	</insert>
+
+    <select id="getSenderProfileList" parameterType="eney.domain.KakaoSenderProfileVO"
+            resultType="eney.domain.KakaoSenderProfileVO">
+        SELECT *
+        FROM
+        (
+        SELECT
+        @num:=@num+1 rownum,
+        E.*
+        FROM
+        (SELECT @num:=0) D,
+        (
+        SELECT * FROM m_kakao_sender_profile where userid = #{userid}
+        ORDER by idx DESC
+        ) E
+        )Z
+        <where>
+            <if test="pageNo != null and pageNo != -1 and pageNo != ''">
+                Z.rownum between #{startRowNo} and #{endRowNo}
+            </if>
+        </where>
+    </select>
+
+    <select id="getSenderProfileListCount" parameterType="eney.domain.KakaoSenderProfileVO"
+            resultType="java.lang.Integer">
+				SELECT count(*) FROM m_kakao_sender_profile WHERE userid = #{userid};
+	</select>
+
+
+    <select id="getAlimtalkTemplateList" parameterType="eney.domain.KakaoAlimtalkTemplateVO"
+            resultType="eney.domain.KakaoAlimtalkTemplateVO">
+        SELECT *
+        FROM
+        (
+        SELECT
+        @num:=@num+1 rownum,
+        E.*
+        FROM
+        (SELECT @num:=0) D,
+        (
+        SELECT * FROM m_kakao_template WHERE userid = #{userid}
+        ORDER by idx DESC
+        ) E
+        )Z
+        <where>
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                Z.rownum between #{startRowNo} and #{endRowNo}
+            </if>
+        </where>
+    </select>
+
+    <select id="getAlimtalkTemplateListCount" parameterType="eney.domain.KakaoAlimtalkTemplateVO"
+			resultType="java.lang.Integer">
+				SELECT count(*) FROM m_kakao_template WHERE userid = #{userid};
+	</select>
+
+</mapper>

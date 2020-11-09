@@ -1,0 +1,41 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.idea
+.gradle
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.gradle
+build/
+gitflow/
+out/
+
+src/main/webapp/react-web/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+/work/
+/upload/
+
+templates.js
+
+client/build
+client/dist
+client/node_modules
+
+### NODE_ENV ###
+
+/LOG_FILE_IS_UNDEFINED/

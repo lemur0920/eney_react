@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="log">
+	<!-- 단축 링크 생성 -->
+	<insert id="insertIvrStatusLog" parameterType="eney.domain.IvrStatusLogVo">
+		INSERT
+		INTO n_ivr_status_log
+		(
+			status_code,
+			timestamp,
+			ip
+		)
+		VALUES
+		(
+			#{status_code},
+			now(),
+			#{ip}
+		)
+		<selectKey resultType="Integer" keyProperty="ivr_status_log_idx" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+	<select id="selectIvrStatusLog" parameterType="eney.domain.IvrStatusLogVo">
+		SELECT ivr_status_log_idx, status_code, timestamp, ip
+		FROM n_ivr_status_log
+		<where>
+		  <if test="ivr_status_log_idx != null">
+			AND ivr_status_log_idx = #{ivr_status_log_idx}
+		  </if>
+		  <if test="status_code != null">
+			AND status_code = #{status_code}
+		  </if>
+		  <if test="ip != null">
+			AND ip = #{ip}
+		  </if>
+		</where>
+	</select>
+
+	<select id="selectIvrStatus" resultType="eney.domain.IvrStatusLogVo">
+		SELECT ivr_status_log_idx, status_code, timestamp, ip
+		FROM n_ivr_status_log
+		WHERE status_code in ('01', '02')
+		ORDER BY ivr_status_log_idx desc
+		LIMIT 0,1
+	</select>
+
+</mapper>

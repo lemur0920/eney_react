@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="visual">
+
+	<select id = "visualGets" parameterType = "string" resultType = "hashmap">
+		SELECT * FROM Visualizations WHERE UserID=#{userid}
+	</select>
+
+	<select id = "visualGet" parameterType = "string" resultType = "hashmap">
+		SELECT * FROM Visualizations WHERE VisualID={id} and UserID=#{userid}
+	</select>
+
+	<insert id = "visualPost" parameterType = "hashmap">
+		INSERT INTO Visualizations
+			(UserID,JSONStr)
+		VALUES (#{userid}, #{data})
+	</insert>
+
+	<update id = "visualPut" parameterType="hashmap">
+		UPDATE Visualizations
+		SET JSONStr=#{data}
+		WHERE VisualID=#{id} and UserID = #{userid}
+	</update>
+
+	<update id = "visualDelete" parameterType="hashmap">
+		UPDATE Visualizations
+		SET JSONStr=#{data}
+		WHERE VisualID=#{id} and UserID = #{userid}
+	</update>
+
+
+	
+</mapper>

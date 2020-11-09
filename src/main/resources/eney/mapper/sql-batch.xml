@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+<mapper namespace="batch">
+	<select id="getTableList"  resultType = "hashmap">
+		SELECT info.user_id, info.account_id, info.tracking_id, info.view_id, info.table_id, info.file_name, info.status,
+			tables.table_name, tables.metrics, tables.dimensions, tables.using_compare
+		FROM eney.n_bi_info info
+		JOIN eney.bi_tables tables
+		ON tables.info_id = info.idx
+	</select>
+	<select id = "getServiceBIList" resultType="eney.domain.ServiceBIVO">
+		SELECT *
+		FROM n_service_bi
+	</select>
+	<insert id = "insertGAData" parameterType = "hashmap">
+		INSERT INTO test.${table_name}
+		VALUES
+		<foreach collection = "list" item = "item" open = "(" close = ")" separator = ", ">
+			#{item}
+		</foreach>
+	</insert>
+	<select id = "getGAUserInfoList" parameterType = 'eney.domain.UserVO' resultType="hashmap">
+		SELECT *
+		FROM n_bi_info
+		WHERE user_id = #{userid}
+	</select>
+	<select id = "getCompareDate" resultType="java.util.LinkedHashMap">
+		SELECT
+			CURDATE()-interval 1 DAY AS DAY,
+			CURDATE()-interval 2 DAY AS 하루전,
+			CURDATE()-interval 1 DAY - interval 7 day as 일주일전,
+			CURDATE()-interval 1 DAY - interval 1 month as 한달전,
+			CURDATE()-interval 1 DAY - interval 3 month as 세달전,
+			CURDATE()-interval 1 DAY - interval 6 month as 여섯달전,
+			CURDATE()-interval 1 DAY - interval 1 year as 일년전
+		FROM DUAL;
+	</select>
+	<select id = "getCompareValue" parameterType="hashmap" resultType="Integer">
+		SELECT ${compare_value}
+		FROM test.${table_name}
+		WHERE ${column1} = #{기기카테고리} AND ${column2} = #{날짜}
+	</select>
+	<insert id = "insertCompareValue" parameterType = "hashmap">
+		INSERT INTO test.${compare_table}
+		VALUES
+		(#{날짜}, #{기기카테고리}
+		<foreach collection = "list" item = "item" open = "," close = ")" separator = ", ">
+			#{item}
+		</foreach>
+	</insert>
+	<select id = "getValue" parameterType="hashmap" resultType="Integer">
+		SELECT
+			SUM(${compare}) AS ${compare}
+		FROM test.${tablename}
+		<![CDATA[
+		WHERE ${column1} <= #{날짜} AND ${column1} >= date_add(#{날짜}, interval -7 day)  AND ${column2} = #{기기카테고리}
+		]]>
+
+	</select>
+	<select id = "getAvgValue" parameterType="hashmap" resultType="hashmap">
+
+		SELECT
+		<foreach collection = "list" item = "value" separator = ", ">
+			IFNULL(ROUND(AVG(${value})),0) AS ${value}
+		</foreach>
+		FROM test.${table_name}
+		<![CDATA[
+		WHERE ${column1} >= #{start_date} AND ${column1} <= #{end_date}
+			AND ${column2} = #{keyword}
+			AND ${column3} = #{day_value}
+		]]>
+	</select>
+	<select id = "getSumValue" parameterType="hashmap" resultType="hashmap">
+
+		SELECT
+			<foreach collection = "list" item = "value" separator = ", ">
+				IFNULL(SUM(${value}),0) AS ${value}
+			</foreach>``
+		FROM test.${table_name}
+		<![CDATA[
+		WHERE ${column1} >= #{start_date} AND ${column1} <= #{end_date}
+			AND ${column2} = #{keyword}
+			AND ${column3} = #{day_value}
+		]]>
+	</select>
+	<select id = "getComValue" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			<foreach collection = "list" item = "value" separator = ", ">
+				(SELECT IFNULL(SUM(${value}), 0)
+				FROM test.${table_name}
+				<![CDATA[ WHERE ${column1} >= #{start_date} AND ${column1} <= #{end_date} ]]>
+				AND ${column2} = #{keyword}
+				 AND ${
+				column3} = #{day_value}
+				)
+				-
+				(SELECT IFNULL(SUM(${value}), 0)
+				FROM test.${table_name}
+				<![CDATA[  WHERE ${column1} >= #{compare_start_date} AND ${column1} <= #{compare_end_date}]]>
+				AND ${column2} = #{keyword}
+				 AND ${column3} = #{day_value}
+				) AS ${value}
+			</foreach>
+		FROM DUAL
+	</select>
+	<select id = "callProcedure"  statementType="CALLABLE" parameterType="hashmap" resultType="hashmap">
+		{call test.INSERT_COMPARE_VALUE(
+			#{list},
+			#{column1},
+			#{column2},
+			#{column3},
+			#{compare_value},
+			#{keyword},
+			#{table_name},
+			#{today_date}
+		)
+		}
+	</select>
+
+	<select id = "getTable" parameterType="hashmap" resultType="hashmap">
+		SELECT *
+		FROM bi_tables
+		WHERE table_name = #{tablename}
+	</select>
+</mapper>

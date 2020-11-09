@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="file">	
+	<insert id="submitFileVO" parameterType="java.util.List" >
+		INSERT INTO n_fileupload (
+	      refer_id, category, name, upload_name, extenstion, volume
+	    ) VALUES 
+	    <foreach item="item" collection="list" separator=",">
+	      ( #{item.refer_id}, #{item.category}, #{item.name}, #{item.upload_name}, #{item.extenstion}, #{item.volume})
+	    </foreach>
+	    <selectKey resultType="Integer" keyProperty="file_id" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+    </insert>
+    
+    <update id="updateFile" parameterType="eney.domain.BoardContentVO">
+    	update n_fileupload set
+    		refer_id = -1
+    	where refer_id = #{content_id}	
+    </update>
+    <select id = "getFileId" parameterType = "eney.domain.FileVO">
+   		select * from n_fileupload where refer_id = #{refer_id} and upload_name like '%invoice%';
+    </select>
+
+	<select id = "getUploadFileByCate" parameterType = "eney.domain.FileVO">
+   		select * from n_fileupload where refer_id = #{refer_id} and upload_name like '%invoice%';
+    </select>
+    
+    <select id="getOriginalFileNameByUploadName" parameterType="java.lang.String" resultType="java.lang.String">
+    	select name from n_fileupload where upload_name = #{fileName}
+    </select>
+    
+    <insert id="insertColorringSourceData" parameterType="eney.domain.ColoringUploadVO">
+    	insert into t_colorring_ivr(
+    		name,file_name,reg_date,login_id,remark
+    	) values
+    	(
+    		#{gubun},#{file_name},now(),#{login_id},'normal'
+    	)
+    </insert>
+
+	<insert id="insertColorringSourceDataSejong" parameterType="eney.domain.ColoringUploadVO">
+		insert into t_colorring_ivr_s(
+		name,file_name,reg_date,login_id,remark
+		) values
+		(
+		#{gubun},#{file_name},now(),#{login_id},'normal'
+		)
+	</insert>
+   
+    <insert id="insertRcvmentSourceData" parameterType="eney.domain.ColoringUploadVO">
+    	insert into t_rcvment_ivr(
+    		name,file_name,reg_date,login_id,remark
+    	) values
+    	(
+    		#{gubun},#{file_name},now(),#{login_id},'normal'
+    	)
+    </insert>
+
+	<insert id="insertRcvmentSourceDataSejong" parameterType="eney.domain.ColoringUploadVO">
+		insert into t_rcvment_ivr_s(
+		name,file_name,reg_date,login_id,remark
+		) values
+		(
+		#{gubun},#{file_name},now(),#{login_id},'normal'
+		)
+	</insert>
+    
+    <select id="getFileVO" parameterType="eney.domain.FileVO" resultType="eney.domain.FileVO">
+		    SELECT * FROM n_fileupload WHERE upload_name = #{name}
+    </select>
+    
+    <select id="selectFile" parameterType="eney.domain.FileVO" resultType="eney.domain.FileVO">
+	    select
+			file_id,
+			refer_id,
+			category,
+			name,
+			extenstion,
+			volume,
+			upload_name
+		from
+			n_fileupload
+		<where>
+			status = 1
+			<if test="file_id != null">
+				AND file_id = #{file_id}
+			</if>
+			<if test="refer_id != null">
+				AND refer_id = #{refer_id}
+			</if>
+			<if test="category != null">
+				AND category = #{category}
+			</if>
+			<if test="name != null">
+				AND name = #{name}
+			</if>
+			<if test="extenstion != null">
+				AND extenstion = #{extenstion}
+			</if>
+			<if test="volume != null">
+				AND volume = #{volume}
+			</if>
+			<if test="upload_name != null">
+				AND upload_name = #{upload_name}
+			</if>
+		</where>
+	 </select>
+
+
+	<update id="deleteFile" parameterType="eney.domain.FileVO">
+    	update n_fileupload set
+    		status = 0
+    	where refer_id = #{refer_id}
+    	and file_id = #{file_id}
+    </update>
+
+</mapper>    

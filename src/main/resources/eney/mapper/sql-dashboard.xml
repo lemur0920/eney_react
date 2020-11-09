@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="dashboard">
+
+	<select id = "GetsByUserID" parameterType = "string" resultType = "hashmap">
+		SELECT * FROM dashboards WHERE UserID=#{userid} and IsDeleted='N'
+	</select>
+
+	<select id = "gets" parameterType = "hashmap" resultType = "hashmap">
+		SELECT * FROM dashboards WHERE UserID=#{userid} and GroupID = #{groupid} and IsDeleted='N'
+	</select>
+
+	<select id = "get" parameterType = "hashmap" resultType = "hashmap">
+		SELECT * FROM dashboards WHERE DashboardID=#{id} and UserID=#{userid}
+	</select>
+
+	<insert id = "post" parameterType = "hashmap">
+		INSERT INTO dashboards
+			(UserID, JSONStr, GroupID, CreatedDate,LastUpdatedDate, IsDeleted)
+		VALUES (#{userid},#{data},#{groupid},sysdate(),sysdate(), 'N')
+		<selectKey resultType="Integer" keyProperty="idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<update id = "put" parameterType="hashmap">
+		UPDATE Dashboards
+		SET JSONStr=#{data}, LastUpdatedDate=sysdate()
+		WHERE DashboardID=#{id} and UserID=#{userid}
+	</update>
+
+	<update id = "delete" parameterType="hashmap">
+		UPDATE Dashboards
+		SET IsDeleted = 'Y'
+		WHERE DashboardID=#{id} and UserID=#{userid}
+	</update>
+
+	<select id="getCompareDate" parameterType="hashmap" resultType="eney.domain.DashboardDataVO">
+		select  *
+		from (select sum(total_call) as total_call from(
+		<foreach collection = "month_list" item = "month" separator = "union all">
+			select count(call_result) as total_call
+			from eney.t_cdr_${month}
+			where user_id = #{userId}
+			<![CDATA[
+			and cs_date = #{yesterday}
+		]]>
+		</foreach>
+		)as a
+		) as b,
+		(select sum(result_call) as result_call, avg(svc_duration) as svc_duration from(
+		<foreach collection = "month_list" item = "value" separator = "union all">
+			select count(call_result) as result_call, avg(svc_duration) as svc_duration
+			from eney.t_cdr_${month}
+			where call_result = ${resultCode}
+			and user_id = #{userId}
+			<![CDATA[
+			and cs_date = #{yesterday}
+		]]>
+		</foreach>
+		)as c
+		) as d,
+		(select sum(total_call) as compare_total_call from(
+		<foreach collection = "month_list" item = "value" separator = "union all">
+			select count(call_result) as total_call
+			from eney.t_cdr_${month}
+			where user_id = #{userId}
+			<![CDATA[
+			and cs_date = #{twoDaysAgo}
+		]]>
+		</foreach>
+		)as e
+		) as f,
+		(select sum(result_call) as compare_result_call, avg(svc_duration) as compare_svc_duration from(
+		<foreach collection = "month_list" item = "value" separator = "union all">
+			select count(call_result) as result_call, avg(svc_duration) as svc_duration
+			from eney.t_cdr_${month}
+			where call_result = ${resultCode}
+			and user_id = #{userId}
+			<![CDATA[
+			and cs_date = #{twoDaysAgo}
+		]]>
+		</foreach>
+		)as g
+		) as h;
+	</select>
+
+	<select id="getResultByCallCount" parameterType="hashmap" resultType="java.lang.Integer">
+	<![CDATA[
+		select sum(total.cnt) as 'total_cnt'
+			from
+			(
+			select count(call_result) cnt
+			from eney.t_cdr_01
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_02
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_03
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_04
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_05
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_06
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_07
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_08
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_09
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_10
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_11
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			union all
+			select count(call_result) cnt
+			from eney.t_cdr_12
+			where call_result = #{resultCode}
+			and user_id = #{userId}
+			and date(cs_date) >= date(date_add(curdate(), interval -1 month))
+			and date(cs_date) <= date(curdate())
+			) total;
+			]]>
+	</select>
+
+	<select id="getDateByCallCount" parameterType="hashmap" resultType="eney.domain.DashboardGraphDataVO">
+		select date_format(cs_date, '%Y-%m-%d')as 'date', count(*) as 'count'
+		from
+			(
+			(select * from eney.t_cdr_01
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_02
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_03
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_04
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_05
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_06
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_07
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_08
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_09
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_10
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_11
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			union all
+			(select * from eney.t_cdr_12
+			WHERE date(cs_date)
+			between date(#{startDate}) and date(#{endDate})
+			and user_id = #{userId})
+			) a
+		group by cs_date;
+	</select>
+
+	<select id="getTimeByCallCount" parameterType="hashmap" resultType="hashmap">
+	select call_time, count
+	from
+	(
+	(
+		select  '00시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '00')
+		union all
+	(
+		select  '01시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '01')
+		union all
+	(
+		select  '02시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '02')
+		union all
+	(
+		select  '03시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '03')
+		union all
+	(
+		select  '04시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '04')
+		union all
+	(
+		select  '05시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '05')
+		union all
+	(
+		select  '06시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '06')
+		union all
+	(
+		select  '07시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '07')
+		union all
+	(
+		select  '08시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '08')
+		union all
+	(
+		select  '09시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '09')
+		union all
+	(
+		select  '10시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '10')
+		union all
+	(
+		select  '11시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '11')
+		union all
+	(
+		select  '12시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '12')
+		union all
+	(
+		select  '13시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '13')
+		union all
+  	(
+		select  '14시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '14')
+		union all
+  	(
+		select  '15시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '15')
+		union all
+  	(
+		select  '16시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '16')
+		union all
+  	(
+		select  '17시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '17')
+		union all
+  	(
+		select  '18시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '18')
+		union all
+  	(
+		select  '19시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '19')
+		union all
+  	(
+		select  '20시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '20')
+		union all
+  	(
+		select  '21시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '21')
+		union all
+  	(
+		select  '22시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '22')
+		union all
+  	(
+		select  '23시' as call_time, count(*) as count  from eney.t_cdr_${month}
+		where cs_date = #{date}
+		and user_id = #{userId}
+		and left(cs_time,2) = '23')
+	) a;
+	</select>
+
+	<select id="getTimeAvgCallCount" parameterType="hashmap" resultType="hashmap">
+		<foreach collection = "month_list" item = "value" separator = "union all">
+		select cs_date, cs_time, call_result
+			from eney.t_cdr_${value}
+			where user_id = #{userId}
+		<![CDATA[
+			and date(cs_date) >= date(#{startDate})
+			and date(cs_date) <= date(#{endDate})
+		]]>
+		</foreach>
+	</select>
+
+	<select id="getRevisitTypeCount" parameterType="hashmap" resultType="hashmap">
+		select  *
+		from (
+		select count(*) as new_visit from(
+		<foreach collection = "month_list" item = "value" separator = "union all">
+		SELECT ani, COUNT(*) AS c
+		FROM t_cdr_${value}
+		where user_id = #{userId}
+		<![CDATA[
+			and date(cs_date) >= date(#{startDate})
+			and date(cs_date) <= date(#{endDate})
+		]]>
+		GROUP BY ani
+		HAVING c=1
+		</foreach>
+		)as a
+		) as c,
+		(
+		select count(*) as revisit_visit from(
+		<foreach collection = "month_list" item = "value" separator = "union all">
+			SELECT ani, COUNT(*) AS c
+			FROM t_cdr_${value}
+			where user_id = #{userId}
+		<![CDATA[
+			and date(cs_date) >= date(#{startDate})
+			and date(cs_date) <= date(#{endDate})
+		]]>
+			GROUP BY ani
+			HAVING c>1
+		</foreach>
+		)as b
+		) as d;
+	</select>
+
+
+	<select id="getCallDeviceTypeCount" parameterType="hashmap" resultType="hashmap">
+	select  *
+	from (
+	select count(*) as total_ani from(
+		<foreach collection = "month_list" item = "value" separator = "union all">
+		select ani
+		from t_cdr_${value}
+		where user_id = #{userId}
+		<![CDATA[
+			and date(cs_date) >= date(#{startDate})
+			and date(cs_date) <= date(#{endDate})
+		]]>
+		</foreach>
+		)as a
+	) as b,
+	(select count(*) as mobile_ani from(
+		<foreach collection = "month_list" item = "value" separator = "union all">
+		select ani
+		from t_cdr_${value}
+		where user_id = #{userId}
+		and (left(ani,3) LIKE '010%'
+			<foreach collection = "mobile_list" item = "mobile">
+				OR left(ani,3) LIKE '${mobile}%'
+			</foreach>
+			)
+		<![CDATA[
+			and date(cs_date) >= date(#{startDate})
+			and date(cs_date) <= date(#{endDate})
+		]]>
+		</foreach>
+		)as c
+	) as d,
+	(
+	select count(*) as virtual_ani from(
+		<foreach collection = "month_list" item = "value" separator = "union all">
+		select ani
+		from t_cdr_${value}
+		where user_id = #{userId}
+		and left(ani,3) = '070'
+		<![CDATA[
+			and date(cs_date) >= date(#{startDate})
+			and date(cs_date) <= date(#{endDate})
+		]]>
+		</foreach>
+		)as e
+	) as f,
+	(
+	select count(*) as area_ani from(
+		<foreach collection = "month_list" item = "value" separator = "union all">
+		select ani
+		from t_cdr_${value}
+		where user_id = #{userId}
+		<![CDATA[
+			and date(cs_date) >= date(#{startDate})
+			and date(cs_date) <= date(#{endDate})
+		]]>
+		and (left(ani,3) LIKE '02%'
+		<foreach collection = "area_list" item = "area">
+		OR left(ani,3) LIKE '${area}%'
+		</foreach>
+		)
+		</foreach>
+		)as g
+	) as h;
+	</select>
+
+
+	<select id="getAgentRanking" parameterType="hashmap" resultType="hashmap">
+
+		SELECT *
+		FROM
+		(
+		SELECT
+		@num:=@num+1 rownum,
+		E.*
+		FROM
+		(SELECT @num:=0) D,
+		(
+			select agent_name, count(*) as count from(
+			<foreach collection = "month_list" item = "month" separator = "union all">
+				select agent_name,  user_id
+				from t_cdr_${month}
+				where user_id = #{userId}
+				<![CDATA[
+			and date(cs_date) >= date(#{startDate})
+			and date(cs_date) <= date(#{endDate})
+			]]>
+			</foreach>
+			) as c
+			group by agent_name
+			order by count desc
+		) E
+		)Z
+
+	</select>
+
+	<select id="getLocationRanking" parameterType="hashmap" resultType="hashmap">
+		SELECT sido, count(*) count
+		from (
+		<foreach collection = "month_list" item = "month" separator = "union all">
+			select  sido
+			FROM t_cdr_${month} AS t${month}
+			JOIN agent_address AS s ON s.vno = t${month}.dn
+			where s.sido is not null
+			and t${month}.user_id = #{userId}
+			<![CDATA[
+		and date(cs_date) >= date(#{startDate})
+		and date(cs_date) <= date(#{endDate})
+		]]>
+		</foreach>
+		) as a
+		group by sido
+		ORDER BY count DESC;
+	</select>
+
+	<select id="getCallRatioKeyword" parameterType="hashmap" resultType="hashmap">
+
+		SELECT *
+		FROM
+		(
+		SELECT
+		@num:=@num+1 rownum,
+		E.*
+		FROM
+		(SELECT @num:=0) D,
+		(
+			SELECT keyword, count(*) as count FROM ga_call_keyword
+			where user_id = #{userId}
+			<![CDATA[
+			and date(search_date) >= date(#{startDate})
+			and date(search_date) <= date(#{endDate})
+			]]>
+			group by keyword
+			order by count desc
+		) E
+		)Z
+	</select>
+
+	<select id="getCallRatioSource" parameterType="hashmap" resultType="hashmap">
+		SELECT source, count(*) as count FROM ga_call_keyword
+		where user_id = #{userId}
+		<![CDATA[
+		and date(search_date) >= date(#{startDate})
+		and date(search_date) <= date(#{endDate})
+		]]>
+		group by source;
+	</select>
+
+	<select id="getCallRatioOS" parameterType="hashmap" resultType="hashmap">
+		SELECT os, count(*) as count FROM ga_call_keyword
+		where user_id = #{userId}
+		<![CDATA[
+		and date(search_date) >= date(#{startDate})
+		and date(search_date) <= date(#{endDate})
+		]]>
+		group by os;
+	</select>
+
+	<select id="getCallRatioBrowser" parameterType="hashmap" resultType="hashmap">
+		SELECT browser, count(*) as count FROM ga_call_keyword
+		where user_id = #{userId}
+		<![CDATA[
+		and date(search_date) >= date(#{startDate})
+		and date(search_date) <= date(#{endDate})
+		]]>
+		group by browser;
+	</select>
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

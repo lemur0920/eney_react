@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="visual">
+
+	<select id = "gets" parameterType = "string" resultType = "hashmap">
+		SELECT * FROM Visualizations WHERE UserID=#{userid}
+	</select>
+
+	<select id = "get" parameterType = "hashmap" resultType = "hashmap">
+		SELECT * FROM Visualizations WHERE VisualID=#{id} and UserID=#{userid}
+	</select>
+
+	<insert id = "post" parameterType = "hashmap">
+		INSERT INTO Visualizations (UserID, JSONStr) VALUES (#{userid}, #{json})
+		<selectKey resultType="Integer" keyProperty="idx" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<update id = "put" parameterType="hashmap">
+		UPDATE Visualizations SET JSONStr=#{json} WHERE VisualID=#{id} and UserID=#{userid}
+	</update>
+
+	<update id = "delete" parameterType="hashmap">
+		UPDATE Visualizations SET JSONStr= '' WHERE VisualID=#{id} and UserID=#{userid}
+	</update>
+
+
+	
+</mapper>

@@ -1,0 +1,7 @@
+.category-wrap a{cursor: pointer;color:#555;}
+.listen-wrap{margin-top: 20px;height:1000px;}
+.sample-wrap{margin-left:40px;margin-top: 40px;width: 500px;height: 200px;float: left;}
+.sample-script-wrap{width: 420px;height: 120px;font-size: 15px;padding: 15px;margin-left: 24px;}
+.sample-caption-wrap{padding-left: 10px;text-align: left;font-size: 18px;color: #222;font-weight: bold;
+		width: 485px;border: 1px solid #edeff0;height: 30px;line-height: 30px;}
+.sample-script-wrap{border: 1px solid #edeff0;background: #f9f7f2;}

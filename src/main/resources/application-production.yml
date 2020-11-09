@@ -1,0 +1,39 @@
+spring:
+  servlet:
+    multipart:
+      location: /usr/local/server/upload
+
+datasource:
+  ivr:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://58.229.254.247:3306/050ivr?autoReconnect=true
+    username: 050ivr
+    password: wkfehlrlfmf
+
+
+security:
+  require-ssl: true
+    
+logging:
+#  config: classpath:/log4j-production.xml
+  file: /var/log/eney_service
+
+eney:
+  portal:
+    portal-url: https://eney.co.kr
+    portal-domain: eney.co.kr
+    api-token-len: 32
+    mail-host: localhost
+    mail-port: 25
+    file-properties:
+      fileLocation: /usr/local/server/upload
+    payment-properties:
+      service-id: M1509350
+      giftcard-commission: 12
+      payment-request-url-prefix: https://pay.billgate.net/
+      payment-request-url-suffix: /certify.jsp
+      return-url-prefix: https://www.eney.co.kr/payment/
+      return-url-suffix: /return
+    user-certify-properties:
+      okurl: https://www.eney.co.kr/userCertify/return
+      

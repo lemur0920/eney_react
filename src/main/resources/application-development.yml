@@ -1,0 +1,35 @@
+spring:
+  servlet:
+    multipart:
+      location: C:/upload
+  devtools:
+    livereload:
+      enabled: true
+
+#security:
+#  require-ssl: false
+
+logging:
+  file :  C:/upload/log
+
+eney:
+  portal:
+    portal-url: http://localhost:8080
+    portal-domain: localhost
+    api-token-len: 32
+    mail-host: localhost
+    mail-port: 25
+    file-properties:
+      fileLocation: C:/upload/
+    payment-properties:
+      service-id: glx_api
+      giftcard-commission: 12
+      payment-request-url-prefix: http://tpay.billgate.net/
+      payment-request-url-suffix: /certify.jsp
+      return-url-prefix: http://localhost:8080/payment/
+      return-url-suffix: /return
+    user-certify-properties:
+      okurl: http://localhost:8080/userCertify/return
+    channel-properties:
+      X-Access-Key: 5a693230784e88e7
+      X-Access-Secret: 33b1e6e55b5f1f9b5a1cf537ee1ed8bf

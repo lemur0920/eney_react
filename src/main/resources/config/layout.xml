@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+
+	<definition name="layout-main" template="/WEB-INF/jsp/layout/layout-main.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-sub" template="/WEB-INF/jsp/layout/layout-sub.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-rule" template="/WEB-INF/jsp/layout/layout-rule.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-myeney" template="/WEB-INF/jsp/layout/layout-left-menu.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-myeney.jsp" />
+		<put-attribute name="left-menu" value="/WEB-INF/jsp/layout/left-myeney.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-myservice" template="/WEB-INF/jsp/layout/layout-left-menu.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-myservice.jsp" />
+		<put-attribute name="left-menu" value="/WEB-INF/jsp/layout/left-myservice.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-epoint" template="/WEB-INF/jsp/layout/layout-introduce.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-myservice.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-introduce-patchcall" template="/WEB-INF/jsp/layout/layout-introduce.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-patchcall.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-introduce-messaging" template="/WEB-INF/jsp/layout/layout-introduce.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-messaging.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-introduce-idc" template="/WEB-INF/jsp/layout/layout-introduce.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-idc.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-introduce-bi" template="/WEB-INF/jsp/layout/layout-introduce.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-bi.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-omnichannel" template="/WEB-INF/jsp/layout/layout-introduce.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-omnichannel.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-introduce-advertising" template="/WEB-INF/jsp/layout/layout-introduce.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-advertising.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="layout-board" template="/WEB-INF/jsp/layout/layout-left-menu.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-board.jsp" />
+		<put-attribute name="left-menu" value="/WEB-INF/jsp/layout/left-board.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="no-layout" template="/WEB-INF/jsp/layout/no-layout.jsp">
+		<put-attribute name="content" value="" />
+	</definition>
+
+
+
+	<definition name="layout-join" template="/WEB-INF/jsp/layout/layout-join.jsp">
+		<put-attribute name="content" value="" />
+	</definition>
+
+	<definition name="join/*" extends="layout-join">
+		<put-attribute name="content" value="/WEB-INF/jsp/join/{1}.jsp" />
+	</definition>
+
+	<definition name="layout-login" template="/WEB-INF/jsp/layout/layout-login.jsp">
+		<put-attribute name="content" value="" />
+	</definition>
+	<definition name="introduce/messaging/messaging_sending_number" extends="no-layout">
+		<put-attribute name="content" value="/WEB-INF/jsp/introduce/messaging/messaging_sending_number.jsp" />
+	</definition>
+
+	<definition name="login" extends="layout-login">
+		<put-attribute name="content" value="/WEB-INF/jsp/login.jsp" />
+	</definition>
+
+	<definition name="test" extends="no-layout">
+		<put-attribute name="content" value="/WEB-INF/jsp/test.jsp" />
+	</definition>
+	<definition name="user/myeney/*" extends="layout-myeney">
+		<put-attribute name="content" value="/WEB-INF/jsp/user/myeney/{1}.jsp" />
+	</definition>
+
+	<definition name="user/myservice/*" extends="layout-myservice">
+		<put-attribute name="content" value="/WEB-INF/jsp/user/myservice/{1}.jsp" />
+	</definition>
+
+	<definition name="user/epoint/*" extends="layout-epoint">
+		<put-attribute name="content" value="/WEB-INF/jsp/user/epoint/{1}.jsp" />
+	</definition>
+	<definition name="layout-service" template="/WEB-INF/jsp/layout/layout-service.jsp">
+		<put-attribute name="nav"
+			value="/WEB-INF/jsp/layout/nav-service.jsp" />
+		<put-attribute name="left-menu"
+			value="/WEB-INF/jsp/layout/left-service.jsp" />
+		<put-attribute name="content" value="" />
+
+	</definition>
+
+	<definition name="layout-admin" template="/WEB-INF/jsp/layout/layout-admin.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-admin.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer"
+			value="/WEB-INF/jsp/layout/footer-admin.jsp" />
+	</definition>
+
+
+
+	<definition name="layout-apis" template="/WEB-INF/jsp/layout/layout-apis.jsp">
+		<put-attribute name="nav" value="/WEB-INF/jsp/layout/nav-sub.jsp" />
+		<put-attribute name="sub-top" value="/WEB-INF/jsp/layout/sub-top-apis.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+	</definition>
+
+	<definition name="apis/user/doc" extends="layout-sub">
+		<put-attribute name="content" value="/WEB-INF/jsp/apis/user/doc.jsp" />
+	</definition>
+
+	<definition name="apis/user/*" extends="layout-apis">
+		<put-attribute name="content" value="/WEB-INF/jsp/apis/user/{1}.jsp" />
+	</definition>
+
+	<definition name="apis/message/*" extends="layout-apis">
+		<put-attribute name="content" value="/WEB-INF/jsp/apis/message/{1}.jsp" />
+	</definition>
+
+
+	<definition name="admin/pop/*" extends="no-layout">
+		<put-attribute name="content" value="/WEB-INF/jsp/admin/pop/{1}.jsp" />
+	</definition>
+
+	<definition name="admin/*" extends="layout-admin">
+		<put-attribute name="content" value="/WEB-INF/jsp/admin/{1}.jsp" />
+	</definition>
+	<definition name="admin/*/*" extends="layout-admin">
+		<put-attribute name="content" value="/WEB-INF/jsp/admin/{1}/{2}.jsp" />
+	</definition>
+	<definition name="admin/*/*/*" extends="layout-admin">
+		<put-attribute name="content" value="/WEB-INF/jsp/admin/{1}/{2}/{3}.jsp" />
+	</definition>
+	<definition name="admin/mail/preview" extends="no-layout">
+		<put-attribute name="content" value="/WEB-INF/jsp/admin/mail/preview.jsp" />
+	</definition>
+
+	<definition name="chat/*" extends="no-layout">
+		<put-attribute name="content" value="/WEB-INF/jsp/chat/{1}.jsp" />
+	</definition>
+
+
+	<definition name="omnichannel/*" extends="layout-omnichannel">
+		<put-attribute name="content" value="/WEB-INF/jsp/omnichannel/{1}.jsp" />
+	</definition>
+
+
+	<definition name="introduce/patchcall/*" extends="layout-introduce-patchcall">
+		<put-attribute name="content" value="/WEB-INF/jsp/introduce/patchcall/{1}.jsp" />
+	</definition>
+	<definition name="introduce/patchcall/coloring/*" extends="layout-introduce-patchcall">
+		<put-attribute name="content" value="/WEB-INF/jsp/introduce/patchcall/coloring/{1}.jsp" />
+	</definition>
+	<definition name="introduce/messaging/*" extends="layout-introduce-messaging">
+		<put-attribute name="content" value="/WEB-INF/jsp/introduce/messaging/{1}.jsp" />
+	</definition>
+	<definition name="introduce/idc/*" extends="layout-introduce-idc">
+		<put-attribute name="content" value="/WEB-INF/jsp/introduce/idc/{1}.jsp" />
+	</definition>
+	<definition name="introduce/bi/*" extends="layout-introduce-bi">
+		<put-attribute name="content" value="/WEB-INF/jsp/introduce/bi/{1}.jsp" />
+	</definition>
+	<definition name="introduce/advertising/*" extends="layout-introduce-advertising">
+		<put-attribute name="content" value="/WEB-INF/jsp/introduce/advertising/{1}.jsp" />
+	</definition>
+
+	<definition name="board/*" extends="layout-board">
+		<put-attribute name="content" value="/WEB-INF/jsp/board/{1}.jsp" />
+	</definition>
+
+	<definition name="utils/*" extends="no-layout">
+		<put-attribute name="content"   value="/WEB-INF/jsp/utils/{1}.jsp" />
+	</definition>
+
+	<definition name="pop/*" extends="no-layout">
+		<put-attribute name="content" value="/WEB-INF/jsp/{1}.jsp" />
+	</definition>
+
+	<definition name="*/pop/*" extends="no-layout">
+		<put-attribute name="content" value="/WEB-INF/jsp/{1}/{2}.jsp" />
+	</definition>
+
+	<definition name="payment/*" extends="no-layout">
+		<put-attribute name="content" value="/WEB-INF/jsp/payment/{1}.jsp" />
+	</definition>
+
+	<definition name="service/*" extends="layout-service">
+		<put-attribute name="content" value="/WEB-INF/jsp/service/{1}.jsp" />
+	</definition>
+
+	<definition name="company/*" extends="layout-sub">
+		<put-attribute name="content" value="/WEB-INF/jsp/company/{1}.jsp" />
+	</definition>
+	<definition name="rule/*" extends="layout-rule">
+		<put-attribute name="content" value="/WEB-INF/jsp/rule/{1}.jsp" />
+	</definition>
+
+	<definition name="service/*/*" extends="layout-service">
+		<put-attribute name="content" value="/WEB-INF/jsp/service/{1}/{2}.jsp" />
+	</definition>
+
+	<definition name="service/*/*/*" extends="layout-service">
+		<put-attribute name="content"
+			value="/WEB-INF/jsp/service/{1}/{2}/{3}.jsp" />
+	</definition>
+
+	<definition name="*" extends="layout-main">
+		<put-attribute name="content" value="/WEB-INF/jsp/{1}.jsp" />
+	</definition>
+
+
+</tiles-definitions>

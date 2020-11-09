@@ -1,0 +1,41 @@
+.pagination-box{
+    width:100%;
+    text-align: center;
+}
+.pagination-nav{
+    display: inline-block;
+    padding:20px;
+}
+
+ul.pagination li {
+    display: inline-block;
+}
+
+ul.pagination li.page-item.active a.page-link {
+    background-color: #62bcff !important;;
+    color: #fff !important;
+}
+ul.pagination li.page-item a.page-link {
+    margin: 0 3px;
+    width: 46px;
+    height: 46px;
+    line-height: 42px;
+    display: inline-block;
+    font-size: 14px;
+    color: #858584;
+    cursor: pointer;
+}
+
+.all_item ul.pagination li.page-item a.page-link{
+    width: 20px;
+    height: 20px;
+    line-height: 16px;
+
+}
+@media screen and (max-width: 768px){
+    ul.pagination li.page-item a.page-link {
+        width: 30px;
+        height: 30px;
+        line-height: 27px;
+    }
+}

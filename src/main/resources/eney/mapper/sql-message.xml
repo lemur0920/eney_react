@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+<mapper namespace="message">
+	<!-- 메시지 전송 -->
+	<insert id="pushMessage" parameterType="eney.domain.MessageVO">
+		INSERT INTO msg_queue (
+			msg_type,dstaddr,callback,stat,
+			subject,text,text2,
+			request_time,
+			k_template_code,
+			k_button_type,k_button_name,k_button_url,k_button_url2,
+			k_button2_type,k_button2_name,k_button2_url,k_button2_url2,
+			k_button3_type,k_button3_name,k_button3_url,k_button3_url2,
+			k_button4_type,k_button4_name,k_button4_url,k_button4_url2,
+			k_button5_type,k_button5_name,k_button5_url,k_button5_url2,
+			k_img_link_url,k_next_type,
+			filecnt,fileloc1,fileloc2,fileloc3,fileloc4,fileloc5,
+		    sender_key
+		)
+		values
+		(
+		#{msg_type}, #{dstaddr}, #{callback},'0',
+		#{subject}, #{text}, #{text2},
+		SYSDATE(),
+		#{k_template_code},
+		#{k_button_type}, #{k_button_name}, #{k_button_url}, #{k_button_url2},
+		#{k_button2_type}, #{k_button2_name}, #{k_button2_url}, #{k_button2_url2},
+		#{k_button3_type}, #{k_button3_name}, #{k_button3_url}, #{k_button3_url2},
+		#{k_button4_type}, #{k_button4_name}, #{k_button4_url}, #{k_button4_url2},
+		#{k_button5_type}, #{k_button5_name}, #{k_button5_url}, #{k_button5_url2},
+		#{k_img_link_url}, #{k_next_type},
+		#{filecnt}, #{fileloc1}, #{fileloc2}, #{fileloc3}, #{fileloc4}, #{fileloc5},
+		#{sender_key}
+		)
+	</insert>
+
+	<!-- 메시지 전송 결과리스트(착신번호 기준)-->
+	<select id="getMessageResult" parameterType="eney.domain.MessageVO" resultType="eney.domain.MessageVO">
+		select * from msg_result_${yyyymm} where dstaddr = #{dstaddr} order by request_time desc limit 1	
+	</select>
+	<!-- 메시지 큐 리스트(착신번호 기준) -->
+	<select id="getMessageQueue" parameterType="eney.domain.MessageVO" resultType="eney.domain.MessageVO">
+		select * from msg_queue where dstaddr = #{dstaddr} order by request_time desc limit 1	
+	</select>
+	<!-- 메시지 전송 결과 리스트(하루 전에서 오늘까지 발송된 문자) -->
+	<select id="getMessageList" parameterType="Map" resultType="Map">
+		<![CDATA[
+			select message.date, message.success, message.mms_success, message.fail, message.total, @running_total := @running_total + message.total AS aggregate
+			from
+				(select distinct date_format(request_time, '%y-%m-%d') date,
+						COUNT(if(msg_type=1 && result=100, result, null)) as 'success',
+						COUNT(if(msg_type=3 && result=100, result, null)) as 'mms_success',
+						COUNT(if(result != 100, result, null)) AS 'fail',
+						COUNT(if(result=100, result, null)) + COUNT(if(result != 100, result, null)) as total from msg_result_${yyyymm}
+				 JOIN (SELECT @running_total := 0) r
+				 where callback = #{callback}
+				 group by date
+			) as message;
+		]]>
+	</select>
+	
+	<update id ="sendSmsEpointCharge" parameterType="eney.domain.MessageVO">
+		{call SMS_EPOINT_CHARGE
+			(
+				#{userid,jdbcType=VARCHAR},
+				'SMS',
+				#{dstaddr,jdbcType=VARCHAR},
+				#{callback,jdbcType=VARCHAR},
+				#{text,jdbcType=VARCHAR},
+				null,
+				@result
+			)
+		}
+	</update>
+	
+	
+</mapper>

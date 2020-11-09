@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cloud">
+
+    <select id = "getOpenStackInstanceInfoByApplyIdx" parameterType="java.lang.Integer" resultType = "eney.domain.OpenStackInstanceVO">
+        select * from openstack_instance
+        where apply_idx = #{idx}
+        and status = "use"
+    </select>
+
+    <select id = "getOpenStackUser" parameterType="java.lang.String" resultType = "eney.domain.OpenStackUserVO">
+        select * from openstack_user
+        where user_id = #{userId}
+    </select>
+
+    <select id = "getOpenStackFlavorId" parameterType="java.lang.String" resultType = "eney.domain.OpenStackFlavorVO">
+        select * from openstack_flavor
+        where name = #{flavorName}
+    </select>
+
+    <select id = "getOpenStackNetworkUUID" parameterType="java.lang.String" resultType = "eney.domain.OpenStackNetworkVO">
+        select * from openstack_network
+        where network_name = #{networkName}
+    </select>
+
+    <select id = "getOpenStackImageId" parameterType="java.lang.String" resultType = "eney.domain.OpenStackImageVO">
+        select * from openstack_image
+        where image_name = #{imageName}
+    </select>
+
+    <insert id = "addInstanceInfo" parameterType="eney.domain.OpenStackInstanceVO">
+        INSERT into openstack_instance (instance_id, user_id, apply_idx,status)
+        VALUES
+        (#{instance_id},#{user_id},#{apply_idx},"use")
+    </insert>
+
+    <update id = "editInstanceInfo" parameterType="eney.domain.OpenStackInstanceVO">
+        UPDATE openstack_instance SET
+        status = #{status}
+        WHERE apply_idx = #{apply_idx}
+    </update>
+
+    <select id = "instanceInfoCnt" parameterType="eney.domain.OpenStackInstanceVO" resultType="java.lang.Integer">
+        select count(*)
+        from openstack_instance
+        where user_id = #{user_id}
+    </select>
+    <select id = "getInstanceInfoList" parameterType="eney.domain.OpenStackInstanceVO" resultType="eney.domain.OpenStackInstanceVO">
+        select *
+        from openstack_instance
+        where user_id = #{user_id}
+        and status = "use"
+    </select>
+
+</mapper>

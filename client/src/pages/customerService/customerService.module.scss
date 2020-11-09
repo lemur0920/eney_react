@@ -1,0 +1,56 @@
+@import "../../lib/styles/utils";
+
+.root{
+  background-color: white;
+  max-width:1140px;
+  margin: 0 auto;
+}
+.appBar{
+  background-color:white;
+  box-shadow:none;
+  margin-top:10px;
+  margin:0 auto;
+}
+.subTitle{
+  text-align:center;
+  font-size:24px;
+  padding:40px;
+}
+
+.indicator{
+  height: 3px;
+  background-color:$eney;
+  transition:none;
+  display: flex;
+  justify-content:center;
+  & div{
+    max-width: 40px;
+    width: 40px;
+    background-color: $eney;
+  }
+}
+
+.labelColor{
+  color:$eney;
+}
+
+.label{
+  font-size: 15px;
+  font-weight: 400;
+  color: #626262;
+  opacity: 1;
+  border: 1px solid #ced0da;
+  &:nth-child(2){
+    border-left: 0px;
+    border-right: 0px;
+  }
+  &.MuiTab-textColorInherit.Mui-selected{
+    color: black;
+    font-weight: 500
+  }
+}
+
+.tabPannel{
+  padding: 30px 0px;
+  min-height:950px;
+}

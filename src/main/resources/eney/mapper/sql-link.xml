@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="link">
+	<!-- 단축 링크 생성 -->
+	<insert id="insertLinkInfo" parameterType="eney.domain.LinkInfoVo">
+		INSERT
+		INTO n_link_info
+		(
+			link_url,
+			link_key,
+			link_category,
+			link_userid,
+			link_timestamp,
+			link_type
+		)
+		VALUES
+		(
+			#{link_url},
+			#{link_key},
+			#{link_category},
+			#{link_userid},
+			now(),
+			#{link_type}
+		)
+		<selectKey resultType="Integer" keyProperty="link_idx" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+	<!-- 단축링크 수정 -->
+	<update id="updateLinkInfo" parameterType="eney.domain.LinkInfoVo">
+		UPDATE
+			n_link_info
+		<set>
+		  <if test="link_url != null">	  
+			link_url = #{link_url},
+		  </if>
+		  <if test="link_key != null">	  
+			link_key = #{link_key},
+		  </if>
+		  <if test="link_category != null">	  
+			link_category = #{link_category},
+		  </if>
+		  <if test="link_type != null">	  
+			link_type = #{link_type},
+		  </if>
+		  <if test="link_delete != null">	  
+			link_delete = #{link_delete},
+		  </if>
+		</set>
+		WHERE
+			link_idx = #{link_idx}	
+	</update>
+	
+	<!-- 링크 정보 조회 -->
+	<select id="selectLinkInfo" parameterType="eney.domain.LinkInfoVo" resultType="eney.domain.LinkInfoVo">
+		SELECT
+			link_idx,
+			link_url,
+			link_key,
+			link_category,
+			link_userid,
+			link_timestamp,
+			link_type,
+			link_delete
+		FROM
+			n_link_info
+		<where>
+			link_delete = false
+		  <if test="link_idx != null">
+			AND link_idx = #{link_idx}		  
+		  </if>
+		  <if test="link_url != null">
+			AND link_url = #{link_url}		  
+		  </if>
+		  <if test="link_category != null">
+			AND link_category = #{link_category}		  
+		  </if>
+		  <if test="link_userid != null">
+			AND link_userid = #{link_userid}		  
+		  </if>
+		  <if test="link_type != null">
+			AND link_type = #{link_type}		  
+		  </if>
+		</where>
+	</select>
+	<select id = "getLinkChannel" parameterType="Map" resultType="HashMap">
+		SELECT * 
+		FROM n_link_info info
+		JOIN n_link_channel channel ON info.link_idx = channel.link_idx
+		WHERE link_userid = #{userid} and info.link_idx = #{link_idx}
+
+	</select>
+	<!-- 링크 정보 간단 조회 -->
+	<select id="selectLinkSimpleInfo" parameterType="Map" resultType="HashMap">
+		SELECT
+			link_idx,
+			link_url
+			<if test="linkChannel != null">
+			, (
+				SELECT
+					link_channel_idx
+				FROM
+					n_link_channel
+				WHERE
+					link_channel_idx = #{linkChannel}
+					AND link_idx = #{link_idx}
+					AND link_channel_delete = false
+				LIMIT 1) as link_channel_idx
+			</if>
+		FROM
+			n_link_info
+		<where>
+			link_idx = #{link_idx}
+			AND (
+				link_key is null
+			  <if test="link_key != null">
+				OR link_key = #{link_key}			  
+			  </if>
+			)
+			AND link_delete = false
+		</where>
+	</select>
+	
+	<!-- * 링크 채널 관련 부분 * -->
+	<!-- 링크 채널 조회 -->
+	<select id="selectLinkChannel" parameterType="eney.domain.LinkChannelVo" resultType="eney.domain.LinkChannelVo">
+		SELECT
+			link_channel_idx,
+			link_idx,
+			link_channel_name,
+			link_channel_ref_category,
+			link_channel_ref_idx,
+			link_channel_userid,
+			link_channel_timestamp,
+			link_channel_delete
+		FROM
+			n_link_channel
+		<where>
+		  link_channel_delete = false
+		  <if test="link_channel_idx != null">
+			AND link_channel_idx = #{link_channel_idx}
+		  </if>
+		  <if test="link_idx != null">
+			AND link_idx = #{link_idx}
+		  </if>
+		  <if test="link_channel_name">
+			AND link_channel_name = #{link_channel_name}
+		  </if>
+		  <if test="link_channel_ref_category">
+			AND link_channel_ref_category = #{link_channel_ref_category}
+		  </if>
+		  <if test="link_channel_ref_idx">
+			AND link_channel_ref_idx = #{link_channel_ref_idx}
+		  </if>
+		  <if test="link_channel_userid">
+			AND link_channel_userid = #{link_channel_userid}
+		  </if>
+		</where>
+	</select>
+	
+	<!-- 링크 채널 생성 -->
+	<insert id="insertLinkChannel" parameterType="eney.domain.LinkChannelVo">
+		INSERT
+		INTO n_link_channel
+		(
+			link_idx,
+			link_channel_name,
+			link_channel_ref_category,
+			link_channel_ref_idx,
+			link_channel_userid,
+			link_channel_timestamp
+		)
+		VALUES
+		(
+			#{link_idx},
+			#{link_channel_name},
+			#{link_channel_ref_category},
+			#{link_channel_ref_idx},
+			#{link_channel_userid},
+			now()
+		)
+		<selectKey resultType="Integer" keyProperty="link_channel_idx" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+	<!-- 링크 접속 로그 추가 -->
+	<insert id="insertLinkLog" parameterType="eney.domain.LinkLogVo">
+		INSERT
+		INTO n_link_log
+		(
+			link_idx,
+			link_channel_idx,
+			link_log_referrer_url,
+			link_log_referrer_host,
+			link_log_referrer_search_query,
+			link_log_agent,
+			link_log_ip,
+			link_log_timestamp
+		)
+		SELECT
+			#{link_idx} AS link_idx,
+			#{link_channel_idx} AS link_channel_idx,
+			#{link_log_referrer_url} AS link_log_referrer_url,
+			#{link_log_referrer_host} AS link_log_referrer_host,
+			#{link_log_referrer_search_query} AS link_log_referrer_search_query,
+			#{link_log_agent} AS link_log_agent,
+			INET_ATON(#{link_log_ip}) AS link_log_ip,
+			now() AS link_log_timestamp
+		FROM
+			DUAL 
+		WHERE
+			NOT EXISTS (
+				SELECT
+					link_idx
+				FROM
+					n_link_log
+				WHERE
+					link_idx = #{link_idx}
+					AND link_log_ip = INET_ATON(#{link_log_ip})
+					AND link_log_timestamp BETWEEN DATE_ADD(now(), interval -1 day) AND NOW()
+			)
+		<selectKey resultType="Integer" keyProperty="link_log_idx" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+
+	<select id="getCallCountSummary" resultType="java.util.HashMap">
+			SELECT DATE(link_log_timestamp), count(*)
+				FROM n_link_log log
+				WHERE link_idx = ${link_idx}
+			GROUP BY DATE(link_log_timestamp);
+	</select>
+
+	
+	<!--<select id="link_channel_idx_selector" resultType="LinkChannelVo">-->
+		<!--SELECT-->
+			<!--link_channel_idx,-->
+			<!--link_idx,-->
+			<!--link_channel_name,-->
+			<!--link_channel_ref_category,-->
+			<!--link_channel_ref_idx,-->
+			<!--link_channel_userid,-->
+			<!--link_channel_timestamp,-->
+			<!--link_channel_delete-->
+		<!--FROM -->
+			<!--n_link_channel -->
+		<!--WHERE link_idx = #{link_idx};-->
+	<!--</select>-->
+	<!---->
+
+
+
+	<select id="selectLinkIdxBycIdx" parameterType="Integer" resultType="eney.domain.LinkChannelVo">
+		SELECT
+			link_channel_idx,
+			link_idx,
+			link_channel_name,
+			link_channel_ref_category,
+			link_channel_ref_idx,
+			link_channel_userid,
+			link_channel_timestamp,
+			link_channel_delete
+		FROM
+			n_link_channel
+		WHERE link_channel_idx = #{link_channel_idx}
+	</select>
+	
+	<select id="selectLinkKeyBylinkIdx" parameterType="Integer" resultType="eney.domain.LinkInfoVo">
+		SELECT 
+			link_idx,link_url, 
+			link_key, link_category, 
+			link_ref_idx, link_userid,
+			link_timestamp,link_type,
+			link_delete
+		FROM 
+			n_link_info 
+		where link_idx = #{link_idx}
+	</select>	
+</mapper>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="acs">
+	<insert id="insertAcsTransmit" parameterType="eney.domain.AcsTransmitVO">
+		insert into n_acs_transmit (result,tel_num,auth_num,userid,status)
+		values (
+			#{result},#{tel_num},#{auth_num},#{userid},#{status}
+		)
+		<selectKey resultType="String" keyProperty="req_num" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
+	<update id = "updateAcsResult" parameterType = "eney.domain.AcsTransmitVO">
+		update  n_acs_transmit
+		set result = #{result}
+		where req_num = #{req_num}
+	</update>
+	<update id = "updateAcsStatus" parameterType = "eney.domain.AcsTransmitVO">
+		update n_acs_transmit as transmit
+			left outer join callback_manage as manage  on transmit.req_num = manage.idx
+		    left outer join callback_manage_history as history on manage.idx= history.idx
+		set manage.status = #{status}, transmit.status = #{status}, history.status = #{status}
+		where req_num = #{req_num};
+	</update>
+
+	<select id = "getTransmitPacket" parameterType = "eney.domain.AcsTransmitVO" resultType = "eney.domain.AcsTransmitVO">
+		select * from n_acs_transmit where req_num = #{req_num}		
+	</select>
+	<select id = "getMessaingList" parameterType = "eney.domain.AcsTransmitVO" resultType = "eney.domain.AcsTransmitVO">
+		select * from (select * from n_acs_transmit) A
+		left outer join callback_manage B on A.userid = B.userid
+		group by req_num
+	</select>
+	<select id = "getMessaingNumberList" parameterType = "eney.domain.AcsTransmitVO" resultType = "eney.domain.AcsTransmitVO">
+		select * from callback_manage
+	</select>
+	<select id = "getMessagingDupleCheck" parameterType = "eney.domain.AcsTransmitVO" resultType = "eney.domain.AcsTransmitVO">
+		select * from (select * from n_acs_transmit) A
+		left outer join callback_manage B on A.req_num = B.idx
+		where A.tel_num = #{tel_num}
+	</select>
+	<select id = "getMessaingListByUserid" parameterType = "eney.domain.AcsTransmitVO" resultType = "eney.domain.AcsTransmitVO">
+		select * from (select * from n_acs_transmit where userid = #{userid})A
+		left join callback_manage B on A.req_num = B.idx
+	</select>
+	<insert id = "setAuthCodeManage" parameterType = "eney.domain.AcsTransmitVO">
+		insert into auth_code_manage (idx,mobile,auth_code,date)
+		values (
+			#{req_num},#{tel_num},#{auth_num},curdate()
+		)
+	</insert>
+	<insert id = "setCallbackManage" parameterType = "eney.domain.AcsTransmitVO">
+		insert into callback_manage (idx,userid,callback,method,status,reg_date,change_date)
+		values (
+			#{req_num},#{userid},#{tel_num},'ars',#{status},curdate(),null
+		)
+	</insert>
+	<insert id = "setCallbackManageHistory" parameterType = "eney.domain.AcsTransmitVO">
+		insert into callback_manage_history (idx,userid,callback,method,status,date)
+		values (
+			#{req_num},#{userid},#{tel_num},'ars',#{status},curdate()
+		)
+	</insert>
+	<delete id ="deleteMessagingNumber" parameterType = "eney.domain.AcsTransmitVO">
+		DELETE transmit, manage, auth, history
+		FROM n_acs_transmit transmit
+		LEFT JOIN auth_code_manage auth on transmit.tel_num =  auth.mobile
+		LEFT JOIN callback_manage manage on transmit.tel_num = manage.callback
+		LEFT JOIN callback_manage_history history on transmit.tel_num = history.callback
+		WHERE transmit.tel_num = #{tel_num};
+	</delete>
+	<delete id ="deleteMessagingNumberForUserid" parameterType = "eney.domain.AcsTransmitVO">
+		DELETE transmit, manage, auth, history
+		FROM n_acs_transmit transmit
+		LEFT JOIN auth_code_manage auth on transmit.tel_num =  auth.mobile
+		LEFT JOIN callback_manage manage on transmit.tel_num = manage.callback
+		LEFT JOIN callback_manage_history history on transmit.tel_num = history.callback
+		WHERE transmit.userid = #{userid};
+	</delete>
+
+	<select id = "countNumber" parameterType = "eney.domain.AcsTransmitVO">
+		select count(*) from n_acs_transmit where tel_num = #{tel_num}
+	</select>
+
+
+	<select id = "getMessaingListByAcsVO" parameterType = "eney.domain.AcsTransmitVO" resultType = "eney.domain.AcsTransmitVO">
+		select * from (select * from n_acs_transmit where userid = #{userid})A
+		left join callback_manage B on A.req_num = B.idx
+	</select>
+
+	<select id = "getMessaingListWithPage" parameterType = "eney.domain.AcsTransmitVO" resultType = "eney.domain.AcsTransmitVO">
+		SELECT *FROM
+			(
+			SELECT
+				@num:=@num+1 rownum,
+				E.*
+				FROM
+				(SELECT @num:=0) D,
+				(SELECT acs.req_num, acs.result, acs.tel_num, acs.auth_num, acs.userid, acs.status, B.idx, B.callback, B.method,  B.reg_date
+				FROM n_acs_transmit as acs
+				left join callback_manage B on acs.req_num = B.idx
+				WHERE acs.userid = #{userid}
+			) E
+		)Z
+		<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+			where Z.rownum between #{startRowNo} and #{endRowNo}
+		</if>
+	</select>
+
+
+	<select id = "getAllCidList" parameterType = "eney.domain.AcsTransmitVO" resultType = "eney.domain.AcsTransmitVO">
+		SELECT *FROM
+		(
+		SELECT
+		@num:=@num+1 rownum,
+		E.*
+		FROM
+		(SELECT @num:=0) D,
+		(SELECT acs.req_num, acs.result, acs.tel_num, acs.auth_num, acs.userid, acs.status, B.idx, B.callback, B.method,  B.reg_date
+		FROM n_acs_transmit as acs
+		left join callback_manage B on acs.req_num = B.idx
+		WHERE (acs.userid = #{userid} and acs.status = 'A')
+		) E
+		)Z
+	</select>
+
+</mapper>

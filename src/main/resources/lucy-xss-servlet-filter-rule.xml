@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 설정은 https://github.com/naver/lucy-xss-servlet-filter/blob/master/src/test/resources/lucy-xss-servlet-filter-rule.xml 참고 -->
+
+<config xmlns="http://www.navercorp.com/lucy-xss-servlet">
+   <defenders>
+       <!-- XssPreventer (<, >를 모두 바꾸는 방식) 등록 -->
+       <defender>
+           <name>xssPreventerDefender</name>
+           <class>com.navercorp.lucy.security.xss.servletfilter.defender.XssPreventerDefender</class>
+       </defender>
+
+       <!-- XssSaxFilter (태그를 인식하여 XSS에 악용될 수 있는 부분을 제외시키는 방식) 등록 -->
+       <defender>
+           <name>xssSaxFilterDefender</name>
+           <class>com.navercorp.lucy.security.xss.servletfilter.defender.XssSaxFilterDefender</class>
+           <init-param>
+               <param-value>/config/lucyXss/lucy-xss-superset-sax.xml</param-value>   <!-- lucy-xss-filter의 sax용 설정파일 -->
+               <param-value>true</param-value>        <!-- 필터링된 코멘트를 남길지 여부, 성능 효율상 false 추천 -->
+           </init-param>
+       </defender>
+   </defenders>
+
+    <!-- default defender 선언, 별다른 defender 선언이 없으면 default defender를 사용해 필터링 한다. -->
+    <default>
+        <defender>xssSaxFilterDefender</defender>
+    </default>
+</config>

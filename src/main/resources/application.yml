@@ -1,0 +1,113 @@
+spring:
+  task:
+    execution:
+      pool:
+        core-size: 8
+        max-size: 8
+  #  mvc:
+#    view:
+#      prefix: /build/
+#      suffix: .html
+  devtools:
+    restart:
+      exclude: static/**, public/**
+  servlet:
+    contextPath: /*
+    multipart:
+      ##운영
+      location: /upload
+      ##개발
+#      location: /Users/eney/upload_img
+#      file-location: uploads
+      max-file-size: 100MB
+      max-request-size: 500MB
+      enabled: true
+#      encoding:
+#      enabled: false
+  http:
+    encoding:
+      charset: utf-8
+      enabled: true
+datasource:
+  web:
+#    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    jdbc-url: jdbc:log4jdbc:mysql://210.103.187.15:3306/eney?autoReconnect=true&useSSL=true&verifyServerCertificate=false&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true
+    validationQuery: SELECT 1
+    testOnBorrow: true
+    username: eney
+    password: $eneyMain!@#
+
+  ivr:
+    driver-class-name: com.mysql.jdbc.Driver
+    jdbc-url: jdbc:mysql://58.229.254.247:3306/050ivr?autoReconnect=true&useSSL=true&verifyServerCertificate=false
+    username: 050ivr
+    password: wkfehlrlfmf
+
+#security:
+#  basic:
+#    enabled: true
+
+server:
+  port: 4000
+  servlet:
+    context-path: /
+eney:
+  portal:
+    portal-url: https://www.eney.co.kr
+    portal-domain: www.eney.co.kr
+    api-token-len: 32
+    mail-host: localhost
+    mail-port: 11125
+    token:
+      jwtSecret: JWTSuperSecretKey
+      jwtExpirationInms: 3600000
+    file-properties:
+      file-max-volume: 10485760
+      mms-file-max-volume: 1048576
+      file-available-extensions: [jpg, gif, tif, tiff, bmp, txt, png, xls, xlsx, pdf, jpeg]
+      img-available-extensions: [jpg, jpeg, gif, png, bmp]
+      sound-available-extensions: [wav]
+      mms-available-extensions: [jpg]
+    payment-properties:
+      service-id: M1509350
+#      service-id: glx_api
+      giftcard-commission: 12
+
+      #운영
+      payment-request-url-prefix: https://pay.billgate.net/
+
+      #개발
+#      payment-request-url-prefix: https://tpay.billgate.net/
+
+      payment-request-url-suffix: /certify.jsp
+      #개발
+#      return-url-prefix: http://localhost:4000/payment/
+
+      #운영
+      return-url-prefix: https://eney.co.kr/payment/
+      return-url-suffix: /return
+    user-certify-properties: 
+      cash-gb: CI
+      ci-svcid: 170321036744
+      pay-mode: 10
+#      okurl: https://www.eney.co.kr/userCertify/return
+      okurl: https://eney.co.kr/userCertify/return
+#      okurl: http://localhost:4000/auth/join
+      cryptyn: Y
+      keygb: 0
+      logoYn: N
+      ci-mode: 61
+      callback: 05061910024
+      callType: P
+#logging:
+#  config: classpath:/logback-spring.xml
+openstack:
+  network_uuid: JWTSuperSecretKey
+  image:
+    centos7:3d81154e-c478-4417-a25d-31bab58d2712
+logging:
+  level:
+      eney: INFO
+      eney.mapper: DEBUG
+

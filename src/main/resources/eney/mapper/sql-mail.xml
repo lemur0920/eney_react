@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="mail">
+	<!-- 메일 관리 정보 추가 -->
+	<insert id="insertMailManagerInfo" parameterType="eney.domain.MailManagerVo">
+		INSERT INTO n_mail_manager
+		(
+			mail_title,
+			mail_type,
+			mail_target_group,
+			mail_content,
+			mail_creat_date,
+			mail_creat_userid,
+			mail_send,
+			mail_send_date,
+			mail_send_userid,
+			mail_success_count,
+			mail_error_count
+		)
+		VALUES
+		(
+			#{mail_title},
+			#{mail_type},
+			#{mail_target_group},
+			#{mail_content},
+			now(),
+			#{mail_creat_userid},
+			#{mail_send},
+			#{mail_send_date},
+			#{mail_send_userid},
+			#{mail_success_count},
+			#{mail_error_count}
+		)
+		<selectKey resultType="Integer" keyProperty="mail_idx" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+	<!-- 메일 관리 정보 수정 -->
+	<update id="updateMailManagerInfo" parameterType="eney.domain.MailManagerVo">
+		UPDATE n_mail_manager
+		  <trim prefix="SET" suffixOverrides=",">
+			<if test="mail_title != null">
+				mail_title = #{mail_title},
+			</if>
+			<if test="mail_type != null">
+				mail_type = #{mail_type},
+			</if>
+			<if test="mail_target_group != null">
+				mail_target_group = #{mail_target_group},
+			</if>
+			<if test="mail_content != null">
+				mail_content = #{mail_content},
+			</if>
+			<if test="mail_creat_userid != null">
+				mail_creat_userid = #{mail_creat_userid},
+				mail_creat_date = now(),
+			</if>
+			<if test="mail_send != null">
+				mail_send = #{mail_send},
+			</if>
+			<if test="mail_send_userid != null">
+				mail_send_userid = #{mail_send_userid},
+				mail_send_date = now(),
+			</if>
+			<if test="mail_success_count != null">
+				mail_success_count = #{mail_success_count},
+			</if>
+			<if test="mail_error_count != null">
+				mail_error_count = #{mail_error_count}
+			</if>
+		  </trim>
+	    <where>
+			mail_idx = #{mail_idx}
+	    </where> 
+	</update>
+	
+	
+	<!-- 메일 관리 정보 검색  -->
+	<select id="selectMailManagerInfo" parameterType="eney.domain.MailManagerVo" resultType="eney.domain.MailManagerVo">
+		SELECT * 
+		FROM 
+			(
+			SELECT
+				@num:=@num+1 rownum,
+				C.*
+			FROM
+				(SELECT @num:=0) D,
+				(SELECT
+					mail_idx,
+					mail_title,
+					mail_type,
+					mail_target_group,
+					mail_content,
+					mail_creat_date,
+					mail_creat_userid,
+					mail_send,
+					mail_send_date,
+					mail_send_userid,
+					mail_success_count,
+					mail_error_count
+				FROM
+					n_mail_manager
+				<where>
+					<if test="mail_idx != null">
+						mail_idx = #{mail_idx}
+					</if>
+					<if test="mail_type != null">
+						AND mail_type = #{mail_type}
+					</if>
+					<if test="mail_target_group != null">
+						AND mail_target_group = #{mail_target_group}
+					</if>
+					<if test="mail_send != null">
+						AND mail_send = #{mail_send}
+					</if>
+					<if test="mail_creat_date != null">
+						AND mail_creat_date = #{mail_creat_date}
+					</if>
+					<if test="mail_creat_userid != null">
+						AND mail_creat_userid = #{mail_creat_userid}
+					</if>
+				</where>
+				ORDER BY
+					mail_idx desc
+				) C
+			 ) Z
+			<if test="present_page != null and present_page != ''">
+			 	WHERE Z.rownum BETWEEN #{present_first_item_idx} AND #{present_last_item_idx}
+			</if>
+	</select>
+	
+	<select id="getMailManagerInfoCnt" parameterType="eney.domain.MailManagerVo" resultType="java.lang.Integer">
+		select 
+			count(*)
+		from
+			n_mail_manager	
+		 <where>
+			<if test="mail_idx != null">
+				mail_idx = #{mail_idx}
+			</if>
+			<if test="mail_type != null">
+				AND mail_type = #{mail_type}
+			</if>
+			<if test="mail_target_group != null">
+				AND mail_target_group = #{mail_target_group}
+			</if>
+			<if test="mail_send != null">
+				AND mail_send = #{mail_send}
+			</if>
+			<if test="mail_creat_date != null">
+				AND mail_creat_date = #{mail_creat_date}
+			</if>
+			<if test="mail_creat_userid != null">
+				AND mail_creat_userid = #{mail_creat_userid}
+			</if>
+		</where>
+	</select>
+	
+	<!-- * 회원정보 조회 * -->
+	<!-- 해당 조건을 만족하는 사용자 조회 -->
+	<select id="getMailTargetInfo" parameterType="eney.domain.UserVO" resultType="eney.domain.UserVO">
+		SELECT idx, name, userid, email, email_agree, member_kind, company_name
+		FROM eney.n_user
+		<where>
+		  <if test="email_agree != null">
+			email_agree = #{email_agree}
+		  </if>
+		  <if test="member_kind != null">
+			AND member_kind = #{member_kind};
+		  </if>
+		</where>
+	</select>
+</mapper>

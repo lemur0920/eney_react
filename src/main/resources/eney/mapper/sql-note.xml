@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="note">
+	<select id="getUncheckedNoteCnt" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+		select count(*) from n_note where receiver_id = #{userid}
+		and check_yn = 0
+	</select>
+
+	<select id="getSendTodayCnt" parameterType="eney.domain.NoteVO"
+		resultType="java.lang.Integer">
+		select count(*) from n_note where sender_id = #{sender_id}
+	</select>
+
+	<insert id="pushNote" parameterType="eney.domain.NoteVO">
+		insert into
+		n_note(sender_id, receiver_id, message)
+		values(#{sender_id},#{receiver_id},#{message})
+	</insert>
+	
+	<select id="getNoteListCnt" parameterType="eney.domain.NoteVO" resultType="java.lang.Integer">
+		select count(*) from n_note
+		<where>
+			<if test="mode == 'dispatch'">
+				sender_id = #{sender_id}
+				order by send_date desc
+			</if>
+			<if test="mode == 'receive'">
+				receiver_id = #{receiver_id}
+				order by send_date desc
+			</if>
+		</where>
+	</select>
+	
+	<select id="getNoteList" parameterType="eney.domain.NoteVO" resultType="eney.domain.NoteVO">
+		select
+		*
+		from
+		(
+		select
+		@num:=@num+1 rownum,
+		C.*
+		from
+		(SELECT @num:=0) D,
+
+		(
+		select * from n_note
+		<where>
+			<if test="mode == 'dispatch'">
+				sender_id = #{sender_id}
+				order by send_date desc
+			</if>
+			<if test="mode == 'receive'">
+				receiver_id = #{receiver_id}
+				order by send_date desc
+			</if>
+		</where>
+		) C
+		) Z
+
+		<if test="present_page != null and present_page != ''">
+			where Z.rownum between #{present_first_item_idx} and
+			#{present_last_item_idx}
+		</if>
+	</select>
+
+	<update id="checkNote" parameterType="java.lang.String">
+		update n_note set
+		check_yn = 1,
+		receive_date = now()
+		where
+		receiver_id = #{user_id} and
+		receive_date is null
+	</update>
+</mapper>

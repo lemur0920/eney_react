@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="datasource">
+
+
+	<select id = "GetTables" parameterType = "string" resultType = "hashmap">
+		SELECT A.*,A.TABLE_NAME as tableName
+		FROM INFORMATION_SCHEMA.TABLES A, test.visualization_tables B
+		WHERE A.TABLE_NAME=B.TableName AND B.UserId=#{userid} and A.TABLE_SCHEMA='test' and A.TABLE_TYPE IN ('BASE TABLE','VIEW')
+
+	</select>
+
+	<select id = "GetFields" parameterType = "string" resultType = "hashmap">
+		SELECT COLUMN_NAME as columnName, DATA_TYPE as columnType, COLUMN_COMMENT as columnComment FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = #{tablename}
+	</select>
+
+	<select id = "GetDatas" parameterType = "hashmap" resultType = "hashmap">
+		select  * from test.${tablename}
+	</select>
+
+	<select id = "GetBatchDatas" parameterType = "hashmap" resultType = "hashmap">
+		select  * from test.${tablename}
+	</select>
+
+</mapper>

@@ -1,0 +1,65 @@
+import React, {useEffect, useState} from 'react';
+import {withRouter} from 'react-router-dom';
+import CustomModal from "../../../components/common/CustomModal";
+import {useDispatch, useSelector} from "react-redux";
+import {initializeForm, customerFileUpload} from "../../../modules/service/customer";
+import qs from "qs";
+
+const CustomerBulkUploadModal = ({open, onClose,cx,sampleDownload,loading,result,error,location,history}) => {
+
+    const dispatch = useDispatch();
+
+    const [uploadFile, setUploadFile] = useState(null);
+
+    const title = "고객 일괄 등록";
+    const subTitle = "";
+
+    const {bulkUpload} = useSelector(({customer,loading}) =>({
+        bulkUpload:customer.bulkUpload
+    }))
+
+    useEffect(() => {
+        if(bulkUpload.result && bulkUpload.error === null){
+            dispatch(initializeForm('bulkUpload'));
+            const {page=1,search_filed = null, search = null,startDate = null, endDate = null} = qs.parse(location.search,{
+                ignoreQueryPrefix:true,
+            });
+
+            history.push(`${location.pathname}?page=${page}${`${search_filed !== null ? (`'&search_filed='${search_filed}`) : ""}`}${`${search !== null ? (`'&search='${search}`) : ""}`}${`${startDate !== null ? (`&startDate=${moment(startDate).format('YYYYMMDD')}`) : ""}`}${`${endDate !== null ? (`&endDate=${moment(endDate).format('YYYYMMDD')}`) : ""}`}`)
+
+            alert("고객 등록 완료");
+            onClose();
+        }
+
+    },[bulkUpload])
+
+    const handleSubmit = (e) => {
+        dispatch(customerFileUpload(uploadFile))
+    }
+
+
+    return (
+        <CustomModal open={open} onClose={onClose} title={title} subTitle={subTitle}>
+            {/*<Box>*/}
+            <p>양식에 맞게 입력 후 파일을 업로드해주세요.</p>
+            <div className={cx("customer_manage_bulk_modal","tb_style_1","wrap_btn")}>
+
+                <form onSubmit={(e) =>{e.preventDefault(); handleSubmit();}} name='excelUploadForm'>
+                    <div>
+                        <input className={cx("excel_upload_input")} id="bulkUpload"  type="file" onChange={(e) => {setUploadFile(e.target.files[0]);}} required={true}/>
+                    </div>
+
+                    {bulkUpload.error !== null && (
+                        <p className={cx("error_msg")}>{bulkUpload.error}</p>
+                    )}
+                    <button type="button" className={cx("btn_g","btn_g2","sample_download")} onClick={() => sampleDownload()}>양식 다운로드</button>
+                    <button type="submit" className={cx("btn_g","btn_g2","closeBtn")}>등록</button>
+                    <button type="button" className={cx("btn_g","closeBtn")} onClick={(e)=>{onClose();}}>닫기</button>
+                </form>
+            </div>
+            {/*</Box>*/}
+        </CustomModal>
+    );
+};
+
+export default withRouter(CustomerBulkUploadModal);

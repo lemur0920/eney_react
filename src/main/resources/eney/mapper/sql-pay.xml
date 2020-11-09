@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="pay">
+	
+	<!--  -->
+	<select id="getPaymentVO" parameterType="eney.domain.PaymentVO" resultType="eney.domain.PaymentVO">
+		select * from n_item where service_code = #{service_code}
+	</select>
+	
+	<!-- 서비스 코드로 아이템 정보를 가져옴 -->
+	<select id="getItemByService_code" parameterType="String" resultType="eney.domain.ItemVo">
+		SELECT service_id, gubun, category, service_name, service_code, sale_price, normal_price, description, service_period, discount_rate
+		FROM n_item 
+		WHERE service_code = #{service_code}
+	</select>
+	
+	<!-- 결제 로그 추가 -->
+	<insert id="insertPaymentLog" parameterType="eney.domain.PaymentLogVo">
+		INSERT INTO n_payment_log
+		(
+			userid,
+			service_code,
+			service_name,
+			amount,
+			pay_method,
+			order_date,
+			cancel_date,
+			status,
+			message,
+			check_sum,
+			data1,
+			data2,
+			item_cate,
+			serial_number
+		)
+		VALUES
+		(
+			#{userid},
+			#{service_code},
+			#{service_name},
+			#{amount},
+			#{pay_method},
+			#{order_date},
+			#{cancel_date},
+			#{status},
+			#{message},
+			#{check_sum},
+			#{data1},
+			#{data2},
+			#{item_cate},
+			#{serial_number}
+		)
+		<selectKey resultType="Integer" keyProperty="orderid" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+	<!-- 결제 로그 수정 -->
+	<update id="updatePaymentLog2" parameterType="eney.domain.PaymentLogVo">
+		UPDATE n_payment_log
+		SET userid = #{userid},
+			service_code = #{service_code},
+			service_name = #{service_name},
+			amount = #{amount},
+			pay_method = #{pay_method},
+			order_date = #{order_date},
+			cancel_date = #{cancel_date},
+			status = #{status},
+			message = #{message},
+			check_sum = #{check_sum},
+			data1 = #{data1},
+			data2 = #{data2},
+			item_cate = #{item_cate},
+			serial_number = #{serial_number}
+		WHERE
+			orderid = #{orderid}
+	</update>
+	
+	<!-- 주문번호로 결제 로그를 찾음 -->
+	<select id="getPaymentLogByOrderid" parameterType="Integer" resultType="eney.domain.PaymentLogVo">
+		SELECT orderid, userid, service_code,service_name, amount, pay_method, order_date, cancel_date, status, message, check_sum,	data1, data2, item_cate, serial_number
+		FROM n_payment_log
+		WHERE orderid = #{orderid}
+	</select>
+	
+	<!-- 050 가상번호 사용기간 연장 -->
+	<update id="extendVnoAgent" parameterType="Map">
+		UPDATE t_agent_ivr 
+		SET limit_date = date_add(limit_date,interval +${extendMonth} month)
+		<where>
+	        vno IN
+	        <foreach collection="targetVnoList" item="item" index="index" separator="," open="(" close=")">
+	            #{item}
+	        </foreach>
+    	</where> 	
+	</update>
+	
+	<!-- epoint 충전 -->
+	<update id="chargeEpoint" parameterType="Map">
+		UPDATE n_user_info
+		SET
+			epoint = epoint + #{chargeEpoint}
+		WHERE
+			userid = #{userid}
+	</update>
+	
+	
+	<insert id="submitPaymentLog" parameterType="eney.domain.G_PayVO">
+		INSERT INTO n_payment_log
+		(
+			userid,
+			serial_number,
+			service_code,
+			service_name,
+			amount,
+			pay_method,
+			order_date,
+			status,
+			check_sum,
+			data1,
+			data2,
+			item_cate
+		)
+		VALUES
+		(
+			#{userId},
+			(concat(SUBSTRING_INDEX(#{service_code},'_',1),(SELECT LPAD((SELECT AUTO_INCREMENT FROM information_schema.TABLES where TABLE_SCHEMA = 'market' and TABLE_NAME = 'n_payment_log'), 8, '0')))),
+			#{itemCode},
+			#{itemName},
+			#{amount},
+			#{pay_method},
+			sysdate(),
+			#{status},
+			#{checkSum},
+			#{data1},
+			#{data2},
+			#{itemCate}
+		)
+		<selectKey resultType="String" keyProperty="orderId" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+	<update id="updatePaymentLog" parameterType="eney.domain.G_PayVO">
+		UPDATE n_payment_log SET
+			status = #{status},
+			message = #{message}
+		where
+			orderId = #{orderId} 
+			<!-- check_sum = #{checkSum} -->
+	</update>
+	
+	<update id="updateAgent" parameterType="eney.domain.G_PayVO">
+		UPDATE t_agent_ivr SET
+			limit_date = (select DATE_FORMAT(date_add((select limit_date where vno = #{data1}), interval +${data2} month), "%Y-%m-%d 00:00:00") from dual)
+		where 
+			vno = #{data1}
+	</update>
+	
+	<select id="getGPaymentVO" parameterType="eney.domain.G_PayVO" resultType="eney.domain.G_PayVO">
+		select * from n_payment_log where orderId = #{orderId}
+	</select>
+	
+	
+	<update id="extend050Agent" parameterType="eney.domain.G_PayVO">
+		update t_agent_ivr 
+		set limit_date = date_add(limit_date,interval +${data2} month)
+		<where>
+	        vno in
+	        <foreach collection="data1_list" item="item" index="index" separator="," open="(" close=")">
+	            #{item.value}
+	        </foreach>
+    	</where> 	
+	</update>
+	
+	<select id="getAdUploaderId" parameterType="java.lang.Integer" resultType="java.lang.String">
+		select ad_info_writer_userid from n_adpower_request a left join n_adpower_info b on a.ad_info_idx = b.ad_info_idx
+		where a.ad_request_idx = #{idx}
+	</select>
+	
+	<!-- 이포인트 사용 기록 -->
+	<insert id="insertEpointLog" parameterType="eney.domain.EpointLogVo">
+		INSERT 
+		INTO n_epoint_log
+		(
+			serial_number,
+			userid,
+			service_code,
+			service_name,
+			charge_epoint,
+			balance_epoint,
+			charge_date,
+			gubun
+		)
+		VALUES
+		(
+			#{serial_number},
+			#{userid},
+			#{service_code},
+			#{service_name},
+			#{charge_epoint},
+			#{balance_epoint},
+			now(),
+			#{gubun}
+		)
+		
+		<selectKey resultType="Integer" keyProperty="epoint_log_id" order="AFTER">
+	        SELECT LAST_INSERT_ID() 
+	    </selectKey>
+	</insert>
+	
+	<insert id="insertEpointChargeLog" parameterType="eney.domain.PaymentVO">
+		insert into n_epoint_log(
+			userid,
+			serial_number,
+			service_code,
+			service_name,
+			charge_epoint,
+			balance_epoint,
+			gubun)
+		values(
+			#{userid},
+			(concat(SUBSTRING_INDEX(#{service_code},'_',1),(SELECT LPAD((SELECT AUTO_INCREMENT FROM information_schema.TABLES where TABLE_SCHEMA = 'market' and TABLE_NAME = 'n_epoint_log'), 8, '0')))),
+			#{service_code},
+			#{service_name},
+			#{charge_epoint},
+			#{balance_epoint},
+			#{gubun}
+		)	
+	</insert>
+	
+	<select id="getEpointLogCnt" parameterType="eney.domain.PaymentVO" resultType="java.lang.Integer">
+		select 
+			count(*) 
+		from 
+			(
+			select 
+				@num:=@num+1 rownum,
+				E.*
+			from
+				(SELECT @num:=0) D,
+		 	(select * from n_epoint_log
+		 	where userid=#{userid}
+		 				<if test="gubun == 'log_charge'">
+		 				and gubun != 'REFUND'
+		 				</if>
+						<if test="startDate != null">
+							<![CDATA[
+							and charge_date >=#{startDate} AND charge_date < #{endDate}
+							]]>
+						</if>
+			    ) E
+					  ) Z
+	</select>
+	
+	<select id="getEpointLogs" parameterType="eney.domain.EpointLogVo" resultType="eney.domain.EpointLogVo">
+		select 
+			* 
+		from 
+			(
+			select 
+				@num:=@num+1 rownum,
+				E.*
+			from
+				(SELECT @num:=0) D,
+		 	(select * from n_epoint_log
+		 	where userid=#{userid}
+		 				<if test="gubun == 'log_charge'">
+		 				and gubun != 'REFUND'
+		 				</if>
+		 				#and gubun != 'REFUND' or gubun is null
+		<if test="startDate != null">
+			<![CDATA[
+			and charge_date >=#{startDate} AND charge_date < #{endDate}
+			]]>
+		</if>
+			order by charge_date desc
+			    ) E
+					  ) Z
+		<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+		 	where Z.rownum between #{startRowNo} and #{endRowNo}
+		</if>
+	</select>
+	
+	<select id="getPaymentLogCnt" parameterType="eney.domain.PaymentVO" resultType="java.lang.Integer">
+		select 
+			count(*) 
+		from 
+			(
+			select 
+				@num:=@num+1 rownum,
+				E.*
+			from
+				(SELECT @num:=0) D,
+		 	(select
+		 		orderId,
+		 		serial_number,
+		 		userid,
+		 		service_code,
+		 		service_name,
+		 		amount,
+		 		pay_method,
+		 		order_date as charge_date,
+		 		cancel_date,
+		 		status,
+		 		message,
+		 		item_cate 
+			from n_payment_log
+			where 
+				userid=#{userid}
+			    <if test="item_cate != null and item_cate != ''"> 
+				and item_cate = #{item_cate}
+				</if> 
+				<if test="status != null and status != ''">
+				and status = #{status}
+				</if>
+				<if test="startDate != null">
+					<![CDATA[
+					and order_date >=#{startDate} AND order_date < #{endDate}
+					]]>
+				</if>
+			    ) E
+					  ) Z
+	</select>
+	
+	<select id="getPaymentLogs" parameterType="eney.domain.PaymentVO" resultType="eney.domain.PaymentVO">
+		select 
+			* 
+		from 
+			(
+			select 
+				@num:=@num+1 rownum,
+				E.*
+			from
+				(SELECT @num:=0) D,
+		 	(select
+		 		orderId,
+		 		serial_number,
+		 		userid,
+		 		service_code,
+		 		service_name,
+		 		amount,
+		 		pay_method,
+		 		order_date as charge_date,
+		 		cancel_date,
+		 		status,
+		 		message,
+		 		item_cate 
+			from n_payment_log
+			where
+			    userid=#{userid}
+			    <if test="item_cate != null and item_cate != ''"> 
+				and item_cate = #{item_cate}
+				</if> 
+				<if test="status != null and status != ''">
+				and status = #{status}
+				</if>
+				<if test="startDate != null">
+					<![CDATA[
+					and order_date >=#{startDate} AND order_date < #{endDate}
+					]]>
+				</if>
+			order by charge_date desc	
+			
+			    ) E
+					  ) Z
+		<if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+			where Z.rownum between #{startRowNo} and #{endRowNo}
+		</if>			  
+		
+	</select>
+	
+	<select id="getAdBuyerId" parameterType="java.lang.Integer" resultType="java.lang.String">
+		select ad_request_userid from n_adpower_request where ad_request_idx = #{ad_request_idx}
+	</select>
+	
+</mapper>
